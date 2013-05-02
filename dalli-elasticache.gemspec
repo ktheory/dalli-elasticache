@@ -21,6 +21,8 @@ Gem::Specification.new do |s|
   s.test_files = Dir.glob("{test,spec}/**/*")
 
   s.add_development_dependency 'rake'
+  s.add_development_dependency 'rspec', '= 2.13.0'
+
   s.add_dependency 'dalli', ">= 1.0.0" # ??
 end
 
