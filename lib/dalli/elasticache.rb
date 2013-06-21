@@ -7,7 +7,7 @@ module Dalli
     attr_accessor :config_host, :config_port, :options
 
     def initialize(config_endpoint, options={})
-      @config_host, @config_port = config_endpoint.split(':')
+      @config_host, @config_port = config_endpoint.gsub(/http.*:\/\//,'').split(':')
       @config_port ||= 11211
       @options = options
 
