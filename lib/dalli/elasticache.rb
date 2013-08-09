@@ -30,7 +30,7 @@ module Dalli
       s = TCPSocket.new(config_host, config_port)
       s.puts "config get cluster\r\n"
       data = []
-      while (line = s.gets) != "END\r\n"
+      while !["END\r\n","ERROR\r\n"].include?(line = s.gets) 
         data << line
       end
 
@@ -41,9 +41,17 @@ module Dalli
     def data
       return @data if @data
       raw_data = config_get_cluster
-      version = raw_data[1].to_i
-      instance_data = raw_data[2].split(/\s+/)
-      instances = instance_data.map{ |raw| host, ip, port = raw.split('|'); {:host => host, :ip => ip, :port => port} }
+      if raw_data.size > 2
+        version = raw_data[1].to_i
+        instance_data = raw_data[2].split(/\s+/)
+        instances = instance_data.map{ |raw| host, ip, port = raw.split('|'); {:host => host, :ip => ip, :port => port} }
+      else
+        # fallback
+        require 'resolv'
+        ip = Resolv.getaddress(config_host)
+        version = "unknown"
+        instances = [{:host => config_host, :ip => ip, :port => config_port}]
+      end
       @data = { :version => version, :instances => instances }
     end
 
