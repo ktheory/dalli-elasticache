@@ -26,7 +26,6 @@ module Dalli
     end
 
     def config_get_cluster
-      # TODO: handle timeouts
       s = TCPSocket.new(config_host, config_port)
       s.puts "config get cluster\r\n"
       data = []
