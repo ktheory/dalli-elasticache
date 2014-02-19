@@ -27,7 +27,7 @@ module Dalli
 
     def config_get_cluster
       s = TCPSocket.new(config_host, config_port)
-      s.puts "config get cluster\r\n"
+      s.puts "get AmazonElastiCache:cluster\r\n"
       data = []
       while (line = s.gets) != "END\r\n"
         data << line
