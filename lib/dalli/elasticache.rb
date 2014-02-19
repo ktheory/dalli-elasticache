@@ -27,10 +27,24 @@ module Dalli
 
     def config_get_cluster
       s = TCPSocket.new(config_host, config_port)
-      s.puts "config get cluster\r\n"
-      data = []
-      while (line = s.gets) != "END\r\n"
-        data << line
+
+      stats = get_response(s, "stats\r\n")
+
+      # Pull out the version STAT from the server response
+      version_stat = stats.select { |s| s =~ /version/ }
+
+      # Produes a string like: ["STAT version 1.4.5\r\n"]; pull the version out
+      memcached_version = Gem::Version.new(version_stat.split(' ')[2])
+
+      # As of 1.4.14 or higher, AWS introduced the "config" command to get cluster
+      # information. For older versions of the server, hosts are stored under the key
+      # "AmazonElastiCache:cluster". For more details see:
+      #
+      # http://docs.aws.amazon.com/AmazonElastiCache/latest/UserGuide/AutoDiscovery.AddingToYourClientLibrary.html
+      if memcached_version >= Gem::Version.new("1.4.14")
+        data = get_response(s, "config get cluster\r\n")
+      else
+        data = get_response(s, "get AmazonElastiCache:cluster\r\n")
       end
 
       s.close
@@ -52,6 +66,16 @@ module Dalli
 
     def servers
       data[:instances].map{ |i| "#{i[:ip]}:#{i[:port]}" }
+    end
+
+    private
+    def get_response(socket, command)
+      socket.puts(command)
+      data = []
+      while (line = socket.gets) != "END\r\n"
+        data << line
+      end
+      data
     end
 
   end
