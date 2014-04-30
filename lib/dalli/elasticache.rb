@@ -1,7 +1,7 @@
 require 'dalli'
 require 'socket'
 require 'dalli/elasticache/version'
-require 'dalli/elasticache/endpoint_response'
+require 'dalli/elasticache/config_response'
 
 module Dalli
   class ElastiCache
