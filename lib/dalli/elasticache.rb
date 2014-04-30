@@ -1,6 +1,7 @@
 require 'dalli'
 require 'socket'
 require 'dalli/elasticache/version'
+require 'dalli/elasticache/endpoint_response'
 
 module Dalli
   class ElastiCache
@@ -17,41 +18,39 @@ module Dalli
       Dalli::Client.new(servers, options)
     end
 
-    def refresh
-      # Reset data
-      @data = nil
-      data
-
-      self
-    end
-
-    def config_get_cluster
-      s = TCPSocket.new(config_host, config_port)
-      s.puts "config get cluster\r\n"
-      data = []
-      while (line = s.gets) != "END\r\n"
-        data << line
-      end
-
-      s.close
-      data
-    end
-
-    def data
-      return @data if @data
-      raw_data = config_get_cluster
-      version = raw_data[1].to_i
-      instance_data = raw_data[2].split(/\s+/)
-      instances = instance_data.map{ |raw| host, ip, port = raw.split('|'); {:host => host, :ip => ip, :port => port} }
-      @data = { :version => version, :instances => instances }
-    end
-
     def version
-      data[:version]
+      response.version
     end
 
     def servers
-      data[:instances].map{ |i| "#{i[:ip]}:#{i[:port]}" }
+      response.servers.map{ |h| "#{h[:ip]}:#{h[:port]}" }
+    end
+    
+    def refresh
+      # Reset data
+      @response = nil
+      response
+
+      self
+    end
+    
+    protected
+    
+    def response
+      @response ||= Dalli::ElastiCacheEndpointResponse.new(raw_cluster_response)
+    end
+    
+    def raw_cluster_response
+      socket = TCPSocket.new(config_host, config_port)
+      socket.puts "config get cluster\r\n"
+      
+      data = ""
+      while (line = socket.gets)
+        data << line
+      end
+
+      socket.close
+      data
     end
 
   end
