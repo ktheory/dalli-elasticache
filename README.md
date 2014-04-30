@@ -1,43 +1,77 @@
-# dalli-elasticache
+Dalli ElastiCache
+=================
+[![Gem Version](https://badge.fury.io/rb/dalli-elasticache.svg)](http://badge.fury.io/rb/dalli-elasticache) [![Code Climate](https://codeclimate.com/github/ktheory/dalli-elasticache.png)](https://codeclimate.com/github/ktheory/dalli-elasticache)
 
-A wrapper for the [Dalli memcached client](https://github.com/mperham/dalli) with support for [AWS ElastiCache Auto Discovery](http://docs.aws.amazon.com/AmazonElastiCache/latest/UserGuide/AutoDiscovery.html)
+A wrapper for configuring [Dalli memcached clients](https://github.com/mperham/dalli)
+from [AWS ElastiCache Auto Discovery](http://docs.aws.amazon.com/AmazonElastiCache/latest/UserGuide/AutoDiscovery.html).
 
-## Installation
+Installation
+------------
 
 Install the [rubygem](https://rubygems.org/gems/dalli-elasticache):
 
-    # in your Gemfile
-    gem 'dalli-elasticache'
+```ruby
+# in your Gemfile
+gem 'dalli-elasticache'
+```
 
-## Usage
+Setup for Rails 3.x and Newer
+-----------------------------
 
-### Using ElastiCache with Rails 3.x and newer:
+Configure your environment-specific application settings:
 
-    # in config/environments/production.rb
-    elasticache = Dalli::ElastiCache.new(config_endpoint)
-    config.cache_store = :dalli_store, elasticache.servers, {:expires_in => 1.day, :compress => true}
+```ruby
+# in config/environments/production.rb
+config_endpoint = "my-cluster-name.abc123.cfg.use1.cache.amazonaws.com:1211"
+elasticache     = Dalli::ElastiCache.new(endpoint)
+
+config.cache_store = :dalli_store, elasticache.servers, {:expires_in => 1.day, :compress => true}
+```
 
 Note that the ElastiCache server list will be refreshed each time an app server process starts.
 
-### General client usage:
+Client Usage
+------------
 
-    # Create an ElastiCache instance with your config endpoint and options for Dalli
-    elasticache = Dalli::ElastiCache.new(config_endpoint, dalli_options={})
-    # For example:
-    elasticache = Dalli::ElastiCache.new("aaron-scratch.vfdnac.cfg.use1.cache.amazonaws.com:11211", :expires_in => 3600, :namespace => "my_app")
+Create an ElastiCache instance:
 
-    elasticache.version # => the config version returned by the ElastiCache config endpoint.
+```ruby
+config_endpoint = "aaron-scratch.vfdnac.cfg.use1.cache.amazonaws.com:11211"
 
-    elasticache.servers # => array of IP addresses and hostnames, e.g. ["10.84.227.115:11211", "10.77.71.127:11211"]
+# Options for configuring the Dalli::Client
+dalli_options = {
+  :expires_in => 24 * 60 * 60,
+  :namespace => "my_app",
+  :compress => true
+}
 
-    client = elasticache.client # a regular Dalli::Client using the instance IP addresses returns by the config endpoint
+elasticache = Dalli::ElastiCache.new(config_endpoint, dalli_options)
+```
 
-    # Check the endpoint to see if the version has changed:
-    elasticache.refresh.version
-    # If so, update your dalli client:
-    client = elasticache.client
+Fetch information about the Memcached nodes:
 
-## License
+```ruby
+# Dalli::Client with configuration from the ElastiCache endpoint
+elasticache.client
+# => #<Dalli::Client ... @servers=["10.84.227.155:11211", ...]>
+
+# Node IP addresses and hostnames
+elasticache.servers
+# => ["10.84.227.115:11211", "10.77.71.127:11211"]
+
+# Configuration endpoint version
+elasticache.version
+# => "1.4.14"
+
+# Refresh data from the endpoint
+elasticache.refresh
+
+# Refresh and get client with new configuration
+elasticache.refresh.client
+```
+
+License
+-------
 
 Copyright 2013 Aaron Suggs
 
