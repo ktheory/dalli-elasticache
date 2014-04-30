@@ -1,9 +1,9 @@
 Dalli ElastiCache
 =================
-[![Gem Version](https://badge.fury.io/rb/dalli-elasticache.svg)](http://badge.fury.io/rb/dalli-elasticache)[![Code Climate](https://codeclimate.com/github/ktheory/dalli-elasticache.png)](https://codeclimate.com/github/ktheory/dalli-elasticache)
+[![Gem Version](https://badge.fury.io/rb/dalli-elasticache.svg)](http://badge.fury.io/rb/dalli-elasticache) [![Code Climate](https://codeclimate.com/github/ktheory/dalli-elasticache.png)](https://codeclimate.com/github/ktheory/dalli-elasticache)
 
-A wrapper for the [Dalli memcached client](https://github.com/mperham/dalli) with support for
-[AWS ElastiCache Auto Discovery](http://docs.aws.amazon.com/AmazonElastiCache/latest/UserGuide/AutoDiscovery.html).
+A wrapper for configuring [Dalli memcached clients](https://github.com/mperham/dalli)
+from [AWS ElastiCache Auto Discovery](http://docs.aws.amazon.com/AmazonElastiCache/latest/UserGuide/AutoDiscovery.html).
 
 Installation
 ------------
@@ -22,8 +22,9 @@ Configure your environment-specific application settings:
 
 ```ruby
 # in config/environments/production.rb
-endpoint    = "my-cluster-name.abc123.cfg.use1.cache.amazonaws.com:1211"
-elasticache = Dalli::ElastiCache.new(endpoint)
+config_endpoint = "my-cluster-name.abc123.cfg.use1.cache.amazonaws.com:1211"
+elasticache     = Dalli::ElastiCache.new(endpoint)
+
 config.cache_store = :dalli_store, elasticache.servers, {:expires_in => 1.day, :compress => true}
 ```
 
@@ -35,7 +36,7 @@ Client Usage
 Create an ElastiCache instance:
 
 ```ruby
-cluster_endpoint = "aaron-scratch.vfdnac.cfg.use1.cache.amazonaws.com:11211"
+config_endpoint = "aaron-scratch.vfdnac.cfg.use1.cache.amazonaws.com:11211"
 
 # Options for configuring the Dalli::Client
 dalli_options = {
