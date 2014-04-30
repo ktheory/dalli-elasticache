@@ -44,7 +44,7 @@ module Dalli
         end
     
         def get_stats_from_remote
-          data = remote_command(STAT_COMMAND)
+          data = remote_command(STATS_COMMAND)
           StatsResponse.new(data)
         end
     
