@@ -19,9 +19,10 @@ Gem::Specification.new do |s|
   s.require_paths = ["lib"]
   s.summary = "Adds AWS ElastiCache Auto Discovery support to Dalli memcache client"
   s.test_files = Dir.glob("{test,spec}/**/*")
-
+  
+  s.required_ruby_version = '>= 1.9.2' # Maybe less?
+  
   s.add_development_dependency 'rake'
   s.add_development_dependency 'rspec'
   s.add_dependency 'dalli', ">= 1.0.0" # ??
 end
-
