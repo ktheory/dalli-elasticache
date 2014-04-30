@@ -1,57 +1,46 @@
 require 'dalli'
 require 'socket'
 require 'dalli/elasticache/version'
-require 'dalli/elasticache/config_response'
+require 'dalli/elasticache/auto_discovery/endpoint'
+require 'dalli/elasticache/auto_discovery/config_response'
+require 'dalli/elasticache/auto_discovery/stats_response'
 
 module Dalli
   class ElastiCache
-    attr_accessor :config_host, :config_port, :options
-
+    attr_reader :endpoint, :options
+    
     def initialize(config_endpoint, options={})
-      @config_host, @config_port = config_endpoint.split(':')
-      @config_port ||= 11211
+      @endpoint = Dalli::Elasticache::AutoDiscovery::Endpoint.new(config_endpoint)
       @options = options
-
     end
-
+    
+    # Dalli::Client configured to connect to the cluster's nodes
     def client
       Dalli::Client.new(servers, options)
     end
-
+    
+    # The number of times the cluster configuration has been changed
+    #
+    # Returns an integer
     def version
-      response.version
-    end
-
-    def servers
-      response.servers.map{ |h| "#{h[:ip]}:#{h[:port]}" }
+      endpoint.config.version
     end
     
+    # The cache engine version of the cluster
+    def engine_version
+      endpoint.engine_version
+    end
+    
+    # List of cluster server nodes with ip addresses and ports
+    def servers
+      endpoint.config.nodes.map{ |h| "#{h[:ip]}:#{h[:port]}" }
+    end
+    
+    # Clear all cached data from the cluster endpoint
     def refresh
-      # Reset data
-      @response = nil
-      response
-
+      @endpoint = Dalli::Elasticache::AutoDiscovery::Endpoint.new(config_endpoint)
+      
       self
     end
-    
-    protected
-    
-    def response
-      @response ||= Dalli::ElastiCacheEndpointResponse.new(raw_cluster_response)
-    end
-    
-    def raw_cluster_response
-      socket = TCPSocket.new(config_host, config_port)
-      socket.puts "config get cluster\r\n"
-      
-      data = ""
-      while (line = socket.gets)
-        data << line
-      end
-
-      socket.close
-      data
-    end
-
   end
 end

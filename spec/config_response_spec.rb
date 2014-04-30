@@ -1,12 +1,9 @@
 require_relative 'spec_helper'
 
-describe 'Dalli::ElastiCacheConfigResponse' do
+describe 'Dalli::Elasticache::AutoDiscovery::ConfigResponse' do
   let :response do
-    text = <<-EOS
-12\r\n
-mycluster.0001.cache.amazonaws.com|10.112.21.1|11211 mycluster.0002.cache.amazonaws.com|10.112.21.2|11211 mycluster.0003.cache.amazonaws.com|10.112.21.3|11211\r\n
-    EOS
-    Dalli::ElastiCacheConfigResponse.new(text)
+    text = "CONFIG cluster 0 141\r\n12\nmycluster.0001.cache.amazonaws.com|10.112.21.1|11211 mycluster.0002.cache.amazonaws.com|10.112.21.2|11211 mycluster.0003.cache.amazonaws.com|10.112.21.3|11211\n\r\n"
+    Dalli::Elasticache::AutoDiscovery::ConfigResponse.new(text)
   end
   
   describe '#version' do
