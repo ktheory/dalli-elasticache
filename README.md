@@ -46,28 +46,28 @@ dalli_options = {
 }
 
 elasticache = Dalli::ElastiCache.new(config_endpoint, dalli_options)
-
-# Get the Dalli::Client with configuration from the ElastiCache endpoint
-elasticache.client
 ```
 
 Fetch information about the Memcached nodes:
 
 ```ruby
-# Node IP addresses and hostnames
-elasticache.servers # => ["10.84.227.115:11211", "10.77.71.127:11211"]
+# Dalli::Client with configuration from the ElastiCache endpoint
+elasticache.client
+# => #<Dalli::Client ... @servers=["10.84.227.155:11211", ...]>
 
-# Get version from the configuration endpoint
-elasticache.version # => "1.4.14"
+# Node IP addresses and hostnames
+elasticache.servers
+# => ["10.84.227.115:11211", "10.77.71.127:11211"]
+
+# Configuration endpoint version
+elasticache.version
+# => "1.4.14"
 
 # Refresh data from the endpoint
 elasticache.refresh
 
 # Refresh and get client with new configuration
 elasticache.refresh.client
-
-# If so, update your dalli client:
-client = elasticache.client
 ```
 
 License
