@@ -1,6 +1,6 @@
 Dalli ElastiCache
 =================
-[![Gem Version](https://badge.fury.io/rb/dalli-elasticache.svg)](http://badge.fury.io/rb/dalli-elasticache) [![Code Climate](https://codeclimate.com/github/ktheory/dalli-elasticache.png)](https://codeclimate.com/github/ktheory/dalli-elasticache)
+[![Gem Version](https://badge.fury.io/rb/dalli-elasticache.svg)](http://badge.fury.io/rb/dalli-elasticache) [![Code Climate](https://codeclimate.com/github/ktheory/dalli-elasticache.png)](https://codeclimate.com/github/ktheory/dalli-elasticache) [![Build Status](https://travis-ci.org/zmillman/dalli-elasticache.svg?branch=request-refactor)](https://travis-ci.org/zmillman/dalli-elasticache)
 
 A wrapper for configuring [Dalli memcached clients](https://github.com/mperham/dalli)
 from [AWS ElastiCache Auto Discovery](http://docs.aws.amazon.com/AmazonElastiCache/latest/UserGuide/AutoDiscovery.html).
@@ -51,7 +51,7 @@ elasticache = Dalli::ElastiCache.new(config_endpoint, dalli_options)
 Fetch information about the Memcached nodes:
 
 ```ruby
-# Dalli::Client with configuration from the ElastiCache endpoint
+# Dalli::Client with configuration from the AutoDiscovery endpoint
 elasticache.client
 # => #<Dalli::Client ... @servers=["10.84.227.155:11211", ...]>
 
@@ -59,8 +59,12 @@ elasticache.client
 elasticache.servers
 # => ["10.84.227.115:11211", "10.77.71.127:11211"]
 
-# Configuration endpoint version
+# Number of times the cluster configuration has changed
 elasticache.version
+# => 12
+
+# Memcached version of the cluster
+elasticache.engine_version
 # => "1.4.14"
 
 # Refresh data from the endpoint
