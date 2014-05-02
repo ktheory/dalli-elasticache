@@ -5,22 +5,28 @@ $:.unshift lib unless $:.include?(lib)
 require 'dalli/elasticache/version'
 
 Gem::Specification.new do |s|
-  s.name = 'dalli-elasticache'
-  s.version = Dalli::ElastiCache::VERSION
-
-  s.authors = ["Aaron Suggs"]
-  s.description = "A wrapper for Dalli with support for AWS ElastiCache Auto Discovery"
-  s.email = "aaron@ktheory.com"
-  s.required_rubygems_version = ">= 1.3.5"
-
-  s.files = Dir.glob("{bin,lib}/**/*") + %w(README.md Rakefile)
-  s.homepage = 'http://github.com/ktheory/dalli-elasticache'
-  s.rdoc_options = ["--charset=UTF-8"]
-  s.require_paths = ["lib"]
-  s.summary = "Adds AWS ElastiCache Auto Discovery support to Dalli memcache client"
-  s.test_files = Dir.glob("{test,spec}/**/*")
+  s.name     = 'dalli-elasticache'
+  s.version  = Dalli::ElastiCache::VERSION
+  s.licenses = ['MIT']
   
-  s.required_ruby_version = '>= 1.9.2' # Maybe less?
+  s.summary     = "Configure Dalli clients with ElastiCache's AutoDiscovery"
+  s.description = <<-EOS
+    This gem provides an interface for fetching cluster information from an AWS
+    ElastiCache AutoDiscovery server and configuring a Dalli client to connect
+    to all nodes in the cache cluster.
+  EOS
+  
+  s.authors     = ["Aaron Suggs"]
+  s.email       = "aaron@ktheory.com"
+  s.homepage    = 'http://github.com/ktheory/dalli-elasticache'
+  
+  s.files         = Dir.glob("{bin,lib}/**/*") + %w(README.md Rakefile)
+  s.rdoc_options  = ["--charset=UTF-8"]
+  s.require_paths = ["lib"]
+  s.test_files    = Dir.glob("{test,spec}/**/*")
+  
+  s.required_ruby_version     = '>= 1.9.2' # Maybe less?
+  s.required_rubygems_version = '>= 1.3.5'
   
   s.add_development_dependency 'rake'
   s.add_development_dependency 'rspec'
