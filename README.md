@@ -1,4 +1,4 @@
-Dalli ElastiCache [![Gem Version](https://badge.fury.io/rb/dalli-elasticache.svg)](http://badge.fury.io/rb/dalli-elasticache) [![Build Status](https://travis-ci.org/zmillman/dalli-elasticache.svg?branch=request-refactor)](https://travis-ci.org/zmillman/dalli-elasticache) [![Code Climate](https://codeclimate.com/github/ktheory/dalli-elasticache.png)](https://codeclimate.com/github/ktheory/dalli-elasticache)
+Dalli ElastiCache [![Gem Version](https://badge.fury.io/rb/dalli-elasticache.svg)](http://badge.fury.io/rb/dalli-elasticache) [![Build Status](https://travis-ci.org/ktheory/dalli-elasticache.svg)](https://travis-ci.org/ktheory/dalli-elasticache) [![Code Climate](https://codeclimate.com/github/ktheory/dalli-elasticache.png)](https://codeclimate.com/github/ktheory/dalli-elasticache)
 =================
 
 Use [AWS ElastiCache AutoDiscovery](http://docs.aws.amazon.com/AmazonElastiCache/latest/UserGuide/AutoDiscovery.html) to automatically configure your [Dalli memcached client](https://github.com/mperham/dalli) with all the nodes in your cluster.
