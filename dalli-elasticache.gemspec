@@ -16,8 +16,8 @@ Gem::Specification.new do |s|
     to all nodes in the cache cluster.
   EOS
   
-  s.authors     = ["Aaron Suggs"]
-  s.email       = "aaron@ktheory.com"
+  s.authors     = ["Aaron Suggs", "Zach Millman"]
+  s.email       = ["aaron@ktheory.com", "zach@magoosh.com"]
   s.homepage    = 'http://github.com/ktheory/dalli-elasticache'
   
   s.files         = Dir.glob("{bin,lib}/**/*") + %w(README.md Rakefile)
