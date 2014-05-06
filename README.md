@@ -20,8 +20,8 @@ Configure your environment-specific application settings:
 
 ```ruby
 # in config/environments/production.rb
-config_endpoint = "my-cluster-name.abc123.cfg.use1.cache.amazonaws.com:11211"
-elasticache     = Dalli::ElastiCache.new(endpoint)
+endpoint    = "my-cluster-name.abc123.cfg.use1.cache.amazonaws.com:11211"
+elasticache = Dalli::ElastiCache.new(endpoint)
 
 config.cache_store = :dalli_store, elasticache.servers, {:expires_in => 1.day, :compress => true}
 ```
