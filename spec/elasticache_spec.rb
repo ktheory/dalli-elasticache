@@ -39,7 +39,17 @@ describe 'Dalli::ElastiCache::Endpoint' do
   end
   
   describe '#refresh' do
-    it 'clears endpoint configuration'
+    it 'clears endpoint configuration' do
+      stale_endpoint = cache.endpoint
+      cache.refresh.endpoint.should_not === stale_endpoint
+    end
+    
+    it 'builds endpoint with same configuration' do
+      stale_endpoint = cache.endpoint
+      cache.refresh
+      cache.endpoint.host.should == stale_endpoint.host
+      cache.endpoint.port.should == stale_endpoint.port
+    end
   end
   
 end
