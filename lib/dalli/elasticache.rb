@@ -38,6 +38,7 @@ module Dalli
     
     # Clear all cached data from the cluster endpoint
     def refresh
+      config_endpoint = "#{endpoint.host}:#{endpoint.port}"
       @endpoint = Dalli::Elasticache::AutoDiscovery::Endpoint.new(config_endpoint)
       
       self
