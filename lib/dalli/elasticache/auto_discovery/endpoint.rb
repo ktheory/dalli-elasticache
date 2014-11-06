@@ -19,7 +19,7 @@ module Dalli
           ENDPOINT_REGEX.match(endpoint) do |m|
             @host = m[1]
             @port = m[2].to_i
-          end
+          end or raise ArgumentError.new("unable to parse hostname and port from endpoint: #{endpoint}")
         end
     
         # A cached ElastiCache::StatsResponse
