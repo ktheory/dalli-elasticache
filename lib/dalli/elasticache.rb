@@ -32,8 +32,9 @@ module Dalli
     end
     
     # List of cluster server nodes with ip addresses and ports
+    # Always use host name instead of private elasticache IPs as internal IPs can change after a node is rebooted
     def servers
-      endpoint.config.nodes.map{ |h| "#{h[:ip]}:#{h[:port]}" }
+      endpoint.config.nodes.map{ |h| "#{h[:host]}:#{h[:port]}" }
     end
     
     # Clear all cached data from the cluster endpoint
