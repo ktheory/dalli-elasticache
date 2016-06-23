@@ -1,16 +1,19 @@
 require_relative 'spec_helper'
 
 describe 'Dalli::Elasticache::AutoDiscovery::Endpoint' do
-  let(:endpoint) do
-    Dalli::Elasticache::AutoDiscovery::Endpoint.new("my-cluster.cfg.use1.cache.amazonaws.com:11211")
-  end
-  
+  subject(:endpoint) { Dalli::Elasticache::AutoDiscovery::Endpoint.new endpoint_str }
+
   describe '.new' do
-    it 'parses host' do
-      endpoint.host.should == "my-cluster.cfg.use1.cache.amazonaws.com"
+    context 'host and port specified' do
+      let(:endpoint_str) { "my-cluster.cfg.use1.cache.amazonaws.com:12345" }
+      its(:host) { should eq 'my-cluster.cfg.use1.cache.amazonaws.com' }
+      its(:port) { should eq 12345 }
     end
-    it 'parses port' do
-      endpoint.port.should == 11211
+
+    context 'only host specified' do
+      let(:endpoint_str) { 'test.example.com' }
+      its(:host) { should eq 'test.example.com' }
+      its(:port) { should eq 11211 }
     end
   end
 end
