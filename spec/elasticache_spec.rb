@@ -5,7 +5,8 @@ describe 'Dalli::ElastiCache::Endpoint' do
     options = {
       :expires_in => 24*60*60,
       :namespace => "my_app",
-      :compress => true
+      :compress => true,
+      :cluster_timeout => 5
     }
     Dalli::ElastiCache.new("my-cluster.cfg.use1.cache.amazonaws.com:11211", options)
   end
@@ -17,6 +18,7 @@ describe 'Dalli::ElastiCache::Endpoint' do
     it 'builds endpoint' do
       cache.endpoint.host.should == "my-cluster.cfg.use1.cache.amazonaws.com"
       cache.endpoint.port.should == 11211
+      cache.endpoint.timeout.should == 5
     end
     
     it 'stores Dalli options' do
