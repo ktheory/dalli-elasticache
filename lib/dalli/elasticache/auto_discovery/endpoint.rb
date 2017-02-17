@@ -8,7 +8,7 @@ module Dalli
         attr_reader :port
 
         # Matches Strings like "my-host.cache.aws.com:11211"
-        ENDPOINT_REGEX = /(?<host>[-.a-zA-Z0-9]+)(:(?<port>\d+))?/
+        ENDPOINT_REGEX = /(?<host>[-_.a-zA-Z0-9]+)(:(?<port>\d+))?/
         DEFAULT_PORT   = 11211
 
         STATS_COMMAND  = "stats\r\n"

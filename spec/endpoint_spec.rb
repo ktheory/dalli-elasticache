@@ -15,5 +15,11 @@ describe 'Dalli::Elasticache::AutoDiscovery::Endpoint' do
       its(:host) { should eq 'test.example.com' }
       its(:port) { should eq 11211 }
     end
+
+    context 'host with underscore' do
+      let(:endpoint_str) { 'test.with_underscore.example.com:8976' }
+      its(:host) { should eq 'test.with_underscore.example.com' }
+      its(:port) { should eq 8976 }
+    end
   end
 end
