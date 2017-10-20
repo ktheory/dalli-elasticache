@@ -75,6 +75,6 @@ elasticache.refresh.client
 License
 -------
 
-Copyright 2013 Aaron Suggs
+Copyright 2017 Aaron Suggs
 
 Released under an [MIT License](http://opensource.org/licenses/MIT)
