@@ -40,6 +40,9 @@ describe 'Dalli::ElastiCache::Endpoint' do
   end
   
   describe '#version' do
+    it 'has constant defined' do
+      defined?(Dalli::ElastiCache::VERSION).should == 'constant'
+    end
   end
   
   describe '#engine_version' do
