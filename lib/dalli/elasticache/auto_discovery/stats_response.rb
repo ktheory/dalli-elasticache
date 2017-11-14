@@ -13,7 +13,7 @@ module Dalli
         attr_reader :text
         
         # Matches the version line of the response
-        VERSION_REGEX = /^STAT version ([0-9.]+)\s*$/
+        VERSION_REGEX = /^STAT version ([0-9.]+).*$/
         
         def initialize(response_text)
           @text = response_text.to_s
