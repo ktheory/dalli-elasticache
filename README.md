@@ -23,7 +23,7 @@ Configure your environment-specific application settings:
 endpoint    = "my-cluster-name.abc123.cfg.use1.cache.amazonaws.com:11211"
 elasticache = Dalli::ElastiCache.new(endpoint)
 
-config.cache_store = :dalli_store, elasticache.servers, {:expires_in => 1.day, :compress => true}
+config.cache_store = :mem_cache_store, elasticache.servers, {:expires_in => 1.day, :compress => true}
 ```
 
 Note that the ElastiCache server list will be refreshed each time an app server process starts.
