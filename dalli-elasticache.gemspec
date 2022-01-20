@@ -26,9 +26,10 @@ Gem::Specification.new do |s|
   s.required_ruby_version     = '>= 2.6.0'
   s.required_rubygems_version = '>= 1.3.5'
 
-  s.add_development_dependency 'rake'
-  s.add_development_dependency 'rspec'
-  s.add_development_dependency 'rubocop'
+  s.add_development_dependency 'faker', '~> 2.19'
+  s.add_development_dependency 'rake', '>= 13.0'
+  s.add_development_dependency 'rspec', '~> 3.10'
+  s.add_development_dependency 'rubocop', '~> 1.0'
   s.add_development_dependency 'rubocop-performance'
   s.add_development_dependency 'rubocop-rake'
   s.add_development_dependency 'rubocop-rspec'

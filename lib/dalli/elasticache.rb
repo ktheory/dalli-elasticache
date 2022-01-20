@@ -4,8 +4,12 @@ require 'dalli'
 require 'socket'
 require 'dalli/elasticache/version'
 require 'dalli/elasticache/auto_discovery/endpoint'
+require 'dalli/elasticache/auto_discovery/base_command'
+require 'dalli/elasticache/auto_discovery/node'
 require 'dalli/elasticache/auto_discovery/config_response'
+require 'dalli/elasticache/auto_discovery/config_command'
 require 'dalli/elasticache/auto_discovery/stats_response'
+require 'dalli/elasticache/auto_discovery/stats_command'
 
 module Dalli
   ##
@@ -47,6 +51,8 @@ module Dalli
     end
 
     # The cache engine version of the cluster
+    #
+    # Returns a string
     def engine_version
       endpoint.engine_version
     end
@@ -54,7 +60,7 @@ module Dalli
     # List of cluster server nodes with ip addresses and ports
     # Always use host name instead of private elasticache IPs as internal IPs can change after a node is rebooted
     def servers
-      endpoint.config.nodes.map { |h| "#{h[:host]}:#{h[:port]}" }
+      endpoint.config.nodes.map(&:to_s)
     end
 
     # Clear all cached data from the cluster endpoint

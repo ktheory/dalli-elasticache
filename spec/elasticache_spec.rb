@@ -11,7 +11,9 @@ describe 'Dalli::ElastiCache::Endpoint' do
     }
   end
 
-  let(:config_endpoint) { 'my-cluster.cfg.use1.cache.amazonaws.com:11211' }
+  let(:host) { 'my-cluster.cfg.use1.cache.amazonaws.com' }
+  let(:port) { 11_211 }
+  let(:config_endpoint) { "#{host}:#{port}" }
   let(:cache) do
     Dalli::ElastiCache.new(config_endpoint, dalli_options)
   end
@@ -44,7 +46,7 @@ describe 'Dalli::ElastiCache::Endpoint' do
     before do
       allow(Dalli::Elasticache::AutoDiscovery::Endpoint).to receive(:new)
         .with(config_endpoint).and_return(stub_endpoint)
-      allow(stub_endpoint).to receive(:config_from_remote).and_return(response)
+      allow(stub_endpoint).to receive(:config).and_return(response)
       allow(Dalli::Client).to receive(:new)
         .with(['mycluster.0001.cache.amazonaws.com:11211',
                'mycluster.0002.cache.amazonaws.com:11211',
@@ -54,7 +56,7 @@ describe 'Dalli::ElastiCache::Endpoint' do
 
     it 'builds with node list and dalli options' do
       expect(client).to eq(mock_dalli)
-      expect(stub_endpoint).to have_received(:config_from_remote)
+      expect(stub_endpoint).to have_received(:config)
       expect(Dalli::Client).to have_received(:new)
         .with(['mycluster.0001.cache.amazonaws.com:11211',
                'mycluster.0002.cache.amazonaws.com:11211',
@@ -69,14 +71,14 @@ describe 'Dalli::ElastiCache::Endpoint' do
     before do
       allow(Dalli::Elasticache::AutoDiscovery::Endpoint).to receive(:new)
         .with(config_endpoint).and_return(stub_endpoint)
-      allow(stub_endpoint).to receive(:config_from_remote).and_return(response)
+      allow(stub_endpoint).to receive(:config).and_return(response)
     end
 
     it 'lists addresses and ports' do
       expect(cache.servers).to eq ['mycluster.0001.cache.amazonaws.com:11211',
                                    'mycluster.0002.cache.amazonaws.com:11211',
                                    'mycluster.0003.cache.amazonaws.com:11211']
-      expect(stub_endpoint).to have_received(:config_from_remote)
+      expect(stub_endpoint).to have_received(:config)
       expect(Dalli::Elasticache::AutoDiscovery::Endpoint).to have_received(:new).with(config_endpoint)
     end
   end
