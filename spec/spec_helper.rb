@@ -1,12 +1,7 @@
-require "bundler/setup"
+# frozen_string_literal: true
 
-require "dalli/elasticache"
+require 'bundler/setup'
 
-RSpec.configure do |config|
-  config.expect_with :rspec do |c|
-    c.syntax = :should
-  end
-  config.mock_with :rspec do |c|
-    c.syntax = :should
-  end
-end
+require 'dalli/elasticache'
+
+RSpec.configure
