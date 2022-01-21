@@ -13,7 +13,7 @@ module Dalli
         attr_reader :host, :port
 
         # Matches Strings like "my-host.cache.aws.com:11211"
-        ENDPOINT_REGEX = /([-.a-zA-Z0-9]+)(?::(\d+))?$/.freeze
+        ENDPOINT_REGEX = /^([-.a-zA-Z0-9]+)(?::(\d+))?$/.freeze
 
         def initialize(addr)
           @host, @port = parse_endpoint_address(addr)
@@ -24,7 +24,7 @@ module Dalli
           m = ENDPOINT_REGEX.match(addr)
           raise ArgumentError, "Unable to parse configuration endpoint address - #{addr}" unless m
 
-          [m[1], (m[2].to_i || DEFAULT_PORT)]
+          [m[1], (m[2] || DEFAULT_PORT).to_i]
         end
 
         # A cached ElastiCache::StatsResponse
