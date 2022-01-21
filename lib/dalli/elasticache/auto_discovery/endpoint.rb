@@ -13,7 +13,7 @@ module Dalli
         attr_reader :host, :port
 
         # Matches Strings like "my-host.cache.aws.com:11211"
-        ENDPOINT_REGEX = /^([-.a-zA-Z0-9]+)(?::(\d+))?$/.freeze
+        ENDPOINT_REGEX = /^([-_.a-zA-Z0-9]+)(?::(\d+))?$/.freeze
 
         def initialize(addr)
           @host, @port = parse_endpoint_address(addr)

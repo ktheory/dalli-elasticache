@@ -23,10 +23,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - BREAKING: engine_version is now returned as a string rather than a Gem::Version to support potentially non-numeric versions. [@petergoldstein](https://github.com/petergoldstein)
 - Updated README to reflect deprecation of DalliStore and preferred use of MemCacheStore. [@xiaoronglv](https://github.com/xiaoronglv)
-- Switched to GitHub Actions from Travis for CI. [@petergoldstein](https://github.com/petergoldstein)
+- Switched to GitHub Actions from Travis for CI. Added Ruby 2.6, 2.7, 3.0, 3.1, ruby-head, jruby-9.3, jruby-head. [@petergoldstein](https://github.com/petergoldstein)
 - Dalli::Elasticache now raises an ArgumentError if it cannot parse the config endpoint argument. [@petergoldstein](https://github.com/petergoldstein)
 - Now use default port of 11211 for configuration endpoint when not explicitly specified. [@petergoldstein](https://github.com/petergoldstein)
 - Refactored internal classes to better enable testing, shrink individual class responsibilities. [@petergoldstein](https://github.com/petergoldstein)
+- Allow underscores in hostnames. 
 
 ### Removed
 

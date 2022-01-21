@@ -20,7 +20,7 @@ describe 'Dalli::Elasticache::AutoDiscovery::Endpoint' do
       end
     end
 
-    context 'when the string includes both only a host' do
+    context 'when the string includes only a host' do
       let(:arg_string) { 'example.cfg.use1.cache.amazonaws.com' }
 
       it 'parses host' do
@@ -69,6 +69,18 @@ describe 'Dalli::Elasticache::AutoDiscovery::Endpoint' do
         expect do
           endpoint
         end.to raise_error ArgumentError, "Unable to parse configuration endpoint address - #{arg_string}"
+      end
+    end
+
+    context 'when the host in the string includes an underscore' do
+      let(:arg_string) { 'my_cluster.cfg.use1.cache.amazonaws.com:12345' }
+
+      it 'parses host' do
+        expect(endpoint.host).to eq 'my_cluster.cfg.use1.cache.amazonaws.com'
+      end
+
+      it 'parses port' do
+        expect(endpoint.port).to eq 12_345
       end
     end
   end
