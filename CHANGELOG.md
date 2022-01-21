@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Rubocop linting. [@petergoldstein](https://github.com/petergoldstein)
 - Specs for reading data off the socket, to ensure that code functions as expected. [@petergoldstein](https://github.com/petergoldstein)
 - This CHANGELOG.md. [@petergoldstein](https://github.com/petergoldstein)
-- Support for Google Memory Cloud. [@petergoldstein](https://github.com/petergoldstein)
+- Support for Google Cloud MemoryStore. [@petergoldstein](https://github.com/petergoldstein)
 
 ### Fixed
 

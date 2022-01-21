@@ -80,8 +80,8 @@ describe 'Dalli::Elasticache::AutoDiscovery::ConfigCommand' do
     end
   end
 
-  context 'when the engine_version is unknown or some other string' do
-    let(:engine_version) { ['unknown', SecureRandom.hex(4), nil].sample }
+  context 'when the engine_version is UNKNOWN or some other string' do
+    let(:engine_version) { ['UNKNOWN', SecureRandom.hex(4), nil].sample }
     let(:cmd) { Dalli::Elasticache::AutoDiscovery::ConfigCommand::CONFIG_COMMAND }
 
     context 'when the socket returns a valid response' do

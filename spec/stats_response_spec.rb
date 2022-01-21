@@ -61,7 +61,7 @@ describe 'Dalli::Elasticache::AutoDiscovery::StatsResponse' do
     end
 
     context "when the version number is the string 'unknown'" do
-      let(:engine_version) { 'unknown' }
+      let(:engine_version) { 'UNKNOWN' }
 
       context 'when the response with the version stat only includes the version number' do
         let(:response_text) do
@@ -83,7 +83,7 @@ describe 'Dalli::Elasticache::AutoDiscovery::StatsResponse' do
             "STAT evictions 0\r\nSTAT reclaimed 0\r\n"
         end
 
-        it "parses out the engine version as 'unknown'" do
+        it "parses out the engine version as 'UNKNOWN'" do
           expect(response.engine_version).to eq engine_version
         end
       end
@@ -108,7 +108,7 @@ describe 'Dalli::Elasticache::AutoDiscovery::StatsResponse' do
             "STAT evictions 0\r\nSTAT reclaimed 0\r\n"
         end
 
-        it "parses out the engine version as 'unknown'" do
+        it "parses out the engine version as 'UNKNOWN'" do
           expect(response.engine_version).to eq engine_version
         end
       end

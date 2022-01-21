@@ -32,7 +32,7 @@ module Dalli
 
         def legacy_config?
           return false unless engine_version
-          return false if engine_version == 'unknown'
+          return false if engine_version.casecmp('unknown').zero?
 
           Gem::Version.new(engine_version) < Gem::Version.new('1.4.14')
         rescue ArgumentError
