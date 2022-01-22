@@ -3,5 +3,7 @@
 require 'bundler/setup'
 
 require 'dalli/elasticache'
+require 'securerandom'
+require 'faker'
 
 RSpec.configure

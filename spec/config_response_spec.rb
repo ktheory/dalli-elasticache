@@ -18,7 +18,7 @@ describe 'Dalli::Elasticache::AutoDiscovery::ConfigResponse' do
 
   describe '#nodes' do
     it 'parses hosts' do
-      expect(response.nodes.map { |s| s[:host] }).to eq [
+      expect(response.nodes.map(&:host)).to eq [
         'mycluster.0001.cache.amazonaws.com',
         'mycluster.0002.cache.amazonaws.com',
         'mycluster.0003.cache.amazonaws.com'
@@ -26,11 +26,11 @@ describe 'Dalli::Elasticache::AutoDiscovery::ConfigResponse' do
     end
 
     it 'parses ip addresses' do
-      expect(response.nodes.map { |s| s[:ip] }).to eq ['10.112.21.1', '10.112.21.2', '10.112.21.3']
+      expect(response.nodes.map(&:ip)).to eq ['10.112.21.1', '10.112.21.2', '10.112.21.3']
     end
 
     it 'parses ports' do
-      expect(response.nodes.map { |s| s[:port] }).to eq [11_211, 11_211, 11_211]
+      expect(response.nodes.map(&:port)).to eq [11_211, 11_211, 11_211]
     end
   end
 end

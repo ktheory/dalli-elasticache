@@ -1,7 +1,7 @@
 Dalli ElastiCache [![Gem Version](https://badge.fury.io/rb/dalli-elasticache.svg)](http://badge.fury.io/rb/dalli-elasticache) [![Build Status](https://github.com/ktheory/dalli-elasticache/actions/workflows/tests.yml/badge.svg)](https://github.com/ktheory/dalli-elasticache/actions/workflows/tests.yml) [![Code Climate](https://codeclimate.com/github/ktheory/dalli-elasticache.png)](https://codeclimate.com/github/ktheory/dalli-elasticache)
 =================
 
-Use [AWS ElastiCache AutoDiscovery](http://docs.aws.amazon.com/AmazonElastiCache/latest/UserGuide/AutoDiscovery.html) to automatically configure your [Dalli memcached client](https://github.com/mperham/dalli) with all the nodes in your cluster.
+Use [AWS ElastiCache AutoDiscovery](http://docs.aws.amazon.com/AmazonElastiCache/latest/UserGuide/AutoDiscovery.html) to automatically configure your [Dalli memcached client](https://github.com/petergoldstein/dalli) with all the nodes in your cluster.
 
 Installation
 ------------
@@ -23,7 +23,7 @@ Configure your environment-specific application settings:
 endpoint    = "my-cluster-name.abc123.cfg.use1.cache.amazonaws.com:11211"
 elasticache = Dalli::ElastiCache.new(endpoint)
 
-config.cache_store = :mem_cache_store, elasticache.servers, {:expires_in => 1.day, :compress => true}
+config.cache_store = :mem_cache_store, elasticache.servers, { expires_in: 1.day, compress: true }
 ```
 
 Note that the ElastiCache server list will be refreshed each time an app server process starts.
@@ -38,9 +38,9 @@ config_endpoint = "aaron-scratch.vfdnac.cfg.use1.cache.amazonaws.com:11211"
 
 # Options for configuring the Dalli::Client
 dalli_options = {
-  :expires_in => 24 * 60 * 60,
-  :namespace => "my_app",
-  :compress => true
+  expires_in: 24 * 60 * 60,
+  namespace: "my_app",
+  compress: true
 }
 
 elasticache = Dalli::ElastiCache.new(config_endpoint, dalli_options)
@@ -75,6 +75,4 @@ elasticache.refresh.client
 License
 -------
 
-Copyright 2017 Aaron Suggs
-
-Released under an [MIT License](http://opensource.org/licenses/MIT)
+Copyright (2017-2022) Aaron Suggs, Peter M. Goldstein. See LICENSE for details.

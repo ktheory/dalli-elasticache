@@ -12,7 +12,7 @@ module Dalli
         attr_reader :text
 
         # Matches the version line of the response
-        VERSION_REGEX = /^(\d+)$/.freeze
+        VERSION_REGEX = /^(\d+)\r?\n/.freeze
 
         # Matches strings like "my-cluster.001.cache.aws.com|10.154.182.29|11211"
         NODE_REGEX = /(([-.a-zA-Z0-9]+)\|(\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b)\|(\d+))/.freeze
@@ -26,7 +26,10 @@ module Dalli
         #
         # Returns an integer
         def version
-          VERSION_REGEX.match(@text)[1].to_i
+          m = VERSION_REGEX.match(@text)
+          return -1 unless m
+
+          m[1].to_i
         end
 
         # Node hosts, ip addresses, and ports
@@ -34,11 +37,7 @@ module Dalli
         # Returns an Array of Hashes with values for :host, :ip and :port
         def nodes
           NODE_LIST_REGEX.match(@text).to_s.scan(NODE_REGEX).map do |match|
-            {
-              host: match[1],
-              ip: match[2],
-              port: match[3].to_i
-            }
+            Node.new(match[1], match[2], match[3].to_i)
           end
         end
       end

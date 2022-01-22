@@ -10,70 +10,36 @@ module Dalli
       ##
       class Endpoint
         # Endpoint configuration
-        attr_reader :host
-        attr_reader :port
+        attr_reader :host, :port
 
         # Matches Strings like "my-host.cache.aws.com:11211"
-        ENDPOINT_REGEX = /([-.a-zA-Z0-9]+):(\d+)/.freeze
+        ENDPOINT_REGEX = /^([-_.a-zA-Z0-9]+)(?::(\d+))?$/.freeze
 
-        STATS_COMMAND  = "stats\r\n"
-        CONFIG_COMMAND = "config get cluster\r\n"
+        def initialize(addr)
+          @host, @port = parse_endpoint_address(addr)
+        end
 
-        # Legacy command for version < 1.4.14
-        OLD_CONFIG_COMMAND = "get AmazonElastiCache:cluster\r\n"
+        DEFAULT_PORT = 11_211
+        def parse_endpoint_address(addr)
+          m = ENDPOINT_REGEX.match(addr)
+          raise ArgumentError, "Unable to parse configuration endpoint address - #{addr}" unless m
 
-        def initialize(endpoint)
-          ENDPOINT_REGEX.match(endpoint) do |m|
-            @host = m[1]
-            @port = m[2].to_i
-          end
+          [m[1], (m[2] || DEFAULT_PORT).to_i]
         end
 
         # A cached ElastiCache::StatsResponse
         def stats
-          @stats ||= stats_from_remote
+          @stats ||= StatsCommand.new(@host, @port).response
         end
 
         # A cached ElastiCache::ConfigResponse
         def config
-          @config ||= config_from_remote
+          @config ||= ConfigCommand.new(@host, @port, engine_version).response
         end
 
         # The memcached engine version
         def engine_version
-          stats.version
-        end
-
-        protected
-
-        def stats_from_remote
-          data = remote_command(STATS_COMMAND)
-          StatsResponse.new(data)
-        end
-
-        def config_from_remote
-          data = if engine_version < Gem::Version.new('1.4.14')
-                   remote_command(OLD_CONFIG_COMMAND)
-                 else
-                   remote_command(CONFIG_COMMAND)
-                 end
-          ConfigResponse.new(data)
-        end
-
-        # Send an ASCII command to the endpoint
-        #
-        # Returns the raw response as a String
-        def remote_command(command)
-          socket = TCPSocket.new(@host, @port)
-          socket.puts command
-
-          data = +''
-          until (line = socket.readline).include?('END')
-            data << line
-          end
-
-          socket.close
-          data
+          stats.engine_version
         end
       end
     end
