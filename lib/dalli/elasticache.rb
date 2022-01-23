@@ -2,20 +2,20 @@
 
 require 'dalli'
 require 'socket'
-require 'dalli/elasticache/version'
-require 'dalli/elasticache/auto_discovery/endpoint'
-require 'dalli/elasticache/auto_discovery/base_command'
-require 'dalli/elasticache/auto_discovery/node'
-require 'dalli/elasticache/auto_discovery/config_response'
-require 'dalli/elasticache/auto_discovery/config_command'
-require 'dalli/elasticache/auto_discovery/stats_response'
-require 'dalli/elasticache/auto_discovery/stats_command'
+require_relative 'elasticache/version'
+require_relative 'elasticache/auto_discovery/endpoint'
+require_relative 'elasticache/auto_discovery/base_command'
+require_relative 'elasticache/auto_discovery/node'
+require_relative 'elasticache/auto_discovery/config_response'
+require_relative 'elasticache/auto_discovery/config_command'
+require_relative 'elasticache/auto_discovery/stats_response'
+require_relative 'elasticache/auto_discovery/stats_command'
 
 module Dalli
   ##
   # Dalli::Elasticache provides an interface for providing a configuration
   # endpoint for a memcached cluster on ElasticCache and retrieving the
-  # list of addresses (IP and port) for the individual nodes of that cluster.
+  # list of addresses (hostname and port) for the individual nodes of that cluster.
   #
   # This allows the caller to pass that server list to Dalli, which then
   # distributes cached items consistently over the nodes.
