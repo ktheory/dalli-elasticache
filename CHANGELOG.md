@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.0.0]
 
+### Fixed
+
+- Loading error because of incorrect path in a require_relative.  [@petervandoros](https://github.com/petervandoros)
+
+## [1.0.0]
+
 ### Added 
 
 - Rubocop linting. [@petergoldstein](https://github.com/petergoldstein)
