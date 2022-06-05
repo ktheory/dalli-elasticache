@@ -20,16 +20,16 @@ describe 'Dalli::Elasticache::AutoDiscovery::Node' do
 
     it 'is equal to a value with the same values' do
       expect(node1a).to eq(node1b)
-      expect(node1a.eql?(node1b)).to eq(true)
+      expect(node1a.eql?(node1b)).to be(true)
     end
 
     it 'is not equal to a value with any differing values' do
       expect(node1a).not_to eq(node_with_different_host)
-      expect(node1a.eql?(node_with_different_host)).to eq(false)
+      expect(node1a.eql?(node_with_different_host)).to be(false)
       expect(node1a).not_to eq(node_with_different_ip)
-      expect(node1a.eql?(node_with_different_ip)).to eq(false)
+      expect(node1a.eql?(node_with_different_ip)).to be(false)
       expect(node1a).not_to eq(node_with_different_port)
-      expect(node1a.eql?(node_with_different_port)).to eq(false)
+      expect(node1a.eql?(node_with_different_port)).to be(false)
     end
   end
 
@@ -58,13 +58,13 @@ describe 'Dalli::Elasticache::AutoDiscovery::Node' do
     end
 
     it 'matches when an equivalent object is used' do
-      expect(test_hash.key?(node1b)).to eq(true)
+      expect(test_hash.key?(node1b)).to be(true)
     end
 
     it 'does not match when an non-equivalent object is used' do
-      expect(test_hash.key?(node_with_different_host)).to eq(false)
-      expect(test_hash.key?(node_with_different_ip)).to eq(false)
-      expect(test_hash.key?(node_with_different_port)).to eq(false)
+      expect(test_hash.key?(node_with_different_host)).to be(false)
+      expect(test_hash.key?(node_with_different_ip)).to be(false)
+      expect(test_hash.key?(node_with_different_port)).to be(false)
     end
   end
 
