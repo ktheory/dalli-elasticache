@@ -21,7 +21,6 @@ Gem::Specification.new do |s|
   s.files         = Dir.glob('{bin,lib}/**/*') + %w[README.md Rakefile]
   s.rdoc_options  = ['--charset=UTF-8']
   s.require_paths = ['lib']
-  s.test_files    = Dir.glob('{test,spec}/**/*')
 
   s.required_ruby_version     = '>= 2.6.0'
   s.required_rubygems_version = '>= 1.3.5'

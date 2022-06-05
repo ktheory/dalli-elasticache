@@ -34,7 +34,7 @@ describe 'Dalli::ElastiCache::Endpoint' do
     it 'stores Dalli options' do
       expect(cache.options[:expires_in]).to eq 24 * 60 * 60
       expect(cache.options[:namespace]).to eq 'my_app'
-      expect(cache.options[:compress]).to eq true
+      expect(cache.options[:compress]).to be true
     end
   end
 
