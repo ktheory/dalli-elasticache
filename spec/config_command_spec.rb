@@ -11,8 +11,8 @@ describe 'Dalli::Elasticache::AutoDiscovery::ConfigCommand' do
     [
       "CONFIG cluster 0 142\r\n",
       "12\r\n",
-      'mycluster.0001.cache.amazonaws.com|10.112.21.1|11211 '\
-      'mycluster.0002.cache.amazonaws.com|10.112.21.2|11211 '\
+      'mycluster.0001.cache.amazonaws.com|10.112.21.1|11211 ' \
+      'mycluster.0002.cache.amazonaws.com|10.112.21.2|11211 ' \
       "mycluster.0003.cache.amazonaws.com|10.112.21.3|11211\r\n",
       "\r\n",
       "END\r\n"

@@ -19,8 +19,8 @@ describe 'Dalli::ElastiCache::Endpoint' do
   end
 
   let(:config_text) do
-    "CONFIG cluster 0 141\r\n12\nmycluster.0001.cache.amazonaws.com|10.112.21.1|11211 "\
-      'mycluster.0002.cache.amazonaws.com|10.112.21.2|11211 '\
+    "CONFIG cluster 0 141\r\n12\nmycluster.0001.cache.amazonaws.com|10.112.21.1|11211 " \
+      'mycluster.0002.cache.amazonaws.com|10.112.21.2|11211 ' \
       "mycluster.0003.cache.amazonaws.com|10.112.21.3|11211\n\r\n"
   end
   let(:response) { Dalli::Elasticache::AutoDiscovery::ConfigResponse.new(config_text) }
