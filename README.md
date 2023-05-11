@@ -49,7 +49,7 @@ Please see [here](https://github.com/petergoldstein/dalli/wiki/Using-Dalli-with-
 Using Dalli ElastiCache with a Dalli Client
 ------------
 
-To initialize a Dalli Client the is configured for all the nodes of a cluster, one simply needs to pass the configuration endpoint and any options for the Dalli Client into the `Dalli::ElastiCache` initializer.  Then one can use the methods on the `Dalli::ElastiCache` object to generate an appropriately configured `Dalli::Client`or to get information about the cluster.
+To initialize a Dalli Client for all the nodes of a cluster, one simply needs to pass the configuration endpoint and any options for the Dalli Client into the `Dalli::ElastiCache` initializer. Then one can use the methods on the `Dalli::ElastiCache` object to generate an appropriately configured `Dalli::Client`or to get information about the cluster.
 
 ```ruby
 config_endpoint = "aaron-scratch.vfdnac.cfg.use1.cache.amazonaws.com:11211"
