@@ -1,7 +1,7 @@
 Dalli ElastiCache [![Gem Version](https://badge.fury.io/rb/dalli-elasticache.svg)](http://badge.fury.io/rb/dalli-elasticache) [![Build Status](https://github.com/ktheory/dalli-elasticache/actions/workflows/tests.yml/badge.svg)](https://github.com/ktheory/dalli-elasticache/actions/workflows/tests.yml) [![Code Climate](https://codeclimate.com/github/ktheory/dalli-elasticache.png)](https://codeclimate.com/github/ktheory/dalli-elasticache)
 =================
 
-Use [AWS ElastiCache AutoDiscovery](http://docs.aws.amazon.com/AmazonElastiCache/latest/UserGuide/AutoDiscovery.html) or [Google Cloud MemoryStore Auto Discovery](https://cloud.google.com/memorystore/docs/memcached/using-auto-discovery) to automatically configure your [Dalli memcached client](https://github.com/petergoldstein/dalli) with all the nodes in your cluster.
+Use [AWS ElastiCache AutoDiscovery](https://docs.aws.amazon.com/AmazonElastiCache/latest/dg/AutoDiscovery.html) or [Google Cloud MemoryStore Auto Discovery](https://cloud.google.com/memorystore/docs/memcached/using-auto-discovery) to automatically configure your [Dalli memcached client](https://github.com/petergoldstein/dalli) with all the nodes in your cluster.
 
 Installation
 ------------
