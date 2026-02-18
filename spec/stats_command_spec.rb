@@ -66,10 +66,10 @@ describe 'Dalli::Elasticache::AutoDiscovery::StatsCommand' do
     ]
   end
 
-  let(:mock_socket) { instance_double(TCPSocket) }
+  let(:mock_socket) { instance_double(Socket) }
 
   before do
-    allow(TCPSocket).to receive(:new).with(host, port).and_return(mock_socket)
+    allow(Socket).to receive(:tcp).with(host, port, connect_timeout: nil).and_return(mock_socket)
     allow(mock_socket).to receive(:close)
     allow(mock_socket).to receive(:puts).with(cmd)
     allow(mock_socket).to receive(:readline).and_return(*socket_response_lines)

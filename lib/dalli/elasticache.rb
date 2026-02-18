@@ -2,6 +2,7 @@
 
 require 'dalli'
 require 'socket'
+require 'timeout'
 require_relative 'elasticache/version'
 require_relative 'elasticache/auto_discovery/endpoint'
 require_relative 'elasticache/auto_discovery/base_command'
@@ -21,6 +22,8 @@ module Dalli
   # distributes cached items consistently over the nodes.
   ##
   class ElastiCache
+    DEFAULT_TIMEOUT = 5
+
     attr_reader :endpoint, :options
 
     ##
@@ -28,13 +31,16 @@ module Dalli
     #
     # config_endpoint - a String containing the host and (optionally) port of the
     # configuration endpoint for the cluster.  If not specified the port will
-    # default to 11211.  The host must be either a DNS name or an IPv4 address.  IPv6
-    # addresses are not handled at this time.
+    # default to 11211.  The host must be either a DNS name, an IPv4 address, or
+    # a bracketed IPv6 address.
     # dalli_options - a set of options passed to the Dalli::Client that is returned
     # by the client method.  Otherwise unused.
+    # timeout: - connect and read timeout in seconds for auto-discovery TCP calls.
+    # Defaults to 5 seconds.
     ##
-    def initialize(config_endpoint, dalli_options = {})
-      @endpoint = Dalli::Elasticache::AutoDiscovery::Endpoint.new(config_endpoint)
+    def initialize(config_endpoint, dalli_options = {}, timeout: DEFAULT_TIMEOUT)
+      @timeout = timeout
+      @endpoint = Dalli::Elasticache::AutoDiscovery::Endpoint.new(config_endpoint, timeout:)
       @options = dalli_options
     end
 
@@ -66,7 +72,7 @@ module Dalli
     # Clear all cached data from the cluster endpoint
     def refresh
       config_endpoint = "#{endpoint.host}:#{endpoint.port}"
-      @endpoint = Dalli::Elasticache::AutoDiscovery::Endpoint.new(config_endpoint)
+      @endpoint = Dalli::Elasticache::AutoDiscovery::Endpoint.new(config_endpoint, timeout: @timeout)
 
       self
     end

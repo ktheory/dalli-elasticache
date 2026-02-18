@@ -12,11 +12,11 @@ module Dalli
         attr_reader :text
 
         # Matches the version line of the response
-        VERSION_REGEX = /^(\d+)\r?\n/.freeze
+        VERSION_REGEX = /^(\d+)\r?\n/
 
         # Matches strings like "my-cluster.001.cache.aws.com|10.154.182.29|11211"
-        NODE_REGEX = /(([-.a-zA-Z0-9]+)\|(\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b)\|(\d+))/.freeze
-        NODE_LIST_REGEX = /^(#{NODE_REGEX}\s*)+$/.freeze
+        NODE_REGEX = /(([-.a-zA-Z0-9]+)\|(\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b)\|(\d+))/
+        NODE_LIST_REGEX = /^(#{NODE_REGEX}\s*)+$/
 
         def initialize(response_text)
           @text = response_text.to_s

@@ -45,7 +45,7 @@ describe 'Dalli::ElastiCache::Endpoint' do
 
     before do
       allow(Dalli::Elasticache::AutoDiscovery::Endpoint).to receive(:new)
-        .with(config_endpoint).and_return(stub_endpoint)
+        .with(config_endpoint, timeout: Dalli::ElastiCache::DEFAULT_TIMEOUT).and_return(stub_endpoint)
       allow(stub_endpoint).to receive(:config).and_return(response)
       allow(Dalli::Client).to receive(:new)
         .with(['mycluster.0001.cache.amazonaws.com:11211',
@@ -70,7 +70,7 @@ describe 'Dalli::ElastiCache::Endpoint' do
 
     before do
       allow(Dalli::Elasticache::AutoDiscovery::Endpoint).to receive(:new)
-        .with(config_endpoint).and_return(stub_endpoint)
+        .with(config_endpoint, timeout: Dalli::ElastiCache::DEFAULT_TIMEOUT).and_return(stub_endpoint)
       allow(stub_endpoint).to receive(:config).and_return(response)
     end
 
@@ -79,7 +79,8 @@ describe 'Dalli::ElastiCache::Endpoint' do
                                    'mycluster.0002.cache.amazonaws.com:11211',
                                    'mycluster.0003.cache.amazonaws.com:11211']
       expect(stub_endpoint).to have_received(:config)
-      expect(Dalli::Elasticache::AutoDiscovery::Endpoint).to have_received(:new).with(config_endpoint)
+      expect(Dalli::Elasticache::AutoDiscovery::Endpoint).to have_received(:new)
+        .with(config_endpoint, timeout: Dalli::ElastiCache::DEFAULT_TIMEOUT)
     end
   end
 

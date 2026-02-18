@@ -83,5 +83,29 @@ describe 'Dalli::Elasticache::AutoDiscovery::Endpoint' do
         expect(endpoint.port).to eq 12_345
       end
     end
+
+    context 'when the string is a bracketed IPv6 address with port' do
+      let(:arg_string) { '[2001:db8::1]:11211' }
+
+      it 'parses host' do
+        expect(endpoint.host).to eq '[2001:db8::1]'
+      end
+
+      it 'parses port' do
+        expect(endpoint.port).to eq 11_211
+      end
+    end
+
+    context 'when the string is a bracketed IPv6 address without port' do
+      let(:arg_string) { '[::1]' }
+
+      it 'parses host' do
+        expect(endpoint.host).to eq '[::1]'
+      end
+
+      it 'parses port' do
+        expect(endpoint.port).to eq 11_211
+      end
+    end
   end
 end
