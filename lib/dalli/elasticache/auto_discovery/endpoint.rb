@@ -15,9 +15,10 @@ module Dalli
         # Matches DNS/IPv4 like "my-host.cache.aws.com:11211" or bracketed IPv6 like "[::1]:11211"
         ENDPOINT_REGEX = /^([-_.a-zA-Z0-9]+|\[[a-fA-F0-9:]+\])(?::(\d+))?$/
 
-        def initialize(addr, timeout: nil)
+        def initialize(addr, timeout: nil, ssl_context: nil)
           @host, @port = parse_endpoint_address(addr)
           @timeout = timeout
+          @ssl_context = ssl_context
         end
 
         DEFAULT_PORT = 11_211
@@ -30,12 +31,12 @@ module Dalli
 
         # A cached ElastiCache::StatsResponse
         def stats
-          @stats ||= StatsCommand.new(@host, @port, @timeout).response
+          @stats ||= StatsCommand.new(@host, @port, @timeout, ssl_context: @ssl_context).response
         end
 
         # A cached ElastiCache::ConfigResponse
         def config
-          @config ||= ConfigCommand.new(@host, @port, @timeout).response
+          @config ||= ConfigCommand.new(@host, @port, @timeout, ssl_context: @ssl_context).response
         end
 
         # The memcached engine version

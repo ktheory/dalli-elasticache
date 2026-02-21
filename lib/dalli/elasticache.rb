@@ -38,9 +38,10 @@ module Dalli
     # timeout: - connect and read timeout in seconds for auto-discovery TCP calls.
     # Defaults to 5 seconds.
     ##
-    def initialize(config_endpoint, dalli_options = {}, timeout: DEFAULT_TIMEOUT)
+    def initialize(config_endpoint, dalli_options = {}, timeout: DEFAULT_TIMEOUT, ssl_context: nil)
       @timeout = timeout
-      @endpoint = Dalli::Elasticache::AutoDiscovery::Endpoint.new(config_endpoint, timeout:)
+      @ssl_context = ssl_context
+      @endpoint = Dalli::Elasticache::AutoDiscovery::Endpoint.new(config_endpoint, timeout:, ssl_context:)
       @options = dalli_options
     end
 
@@ -72,8 +73,8 @@ module Dalli
     # Clear all cached data from the cluster endpoint
     def refresh
       config_endpoint = "#{endpoint.host}:#{endpoint.port}"
-      @endpoint = Dalli::Elasticache::AutoDiscovery::Endpoint.new(config_endpoint, timeout: @timeout)
-
+      @endpoint = Dalli::Elasticache::AutoDiscovery::Endpoint.new(config_endpoint, timeout: @timeout,
+                                                                                   ssl_context: @ssl_context)
       self
     end
   end
