@@ -12,11 +12,12 @@ module Dalli
         # Endpoint configuration
         attr_reader :host, :port
 
-        # Matches Strings like "my-host.cache.aws.com:11211"
-        ENDPOINT_REGEX = /^([-_.a-zA-Z0-9]+)(?::(\d+))?$/.freeze
+        # Matches DNS/IPv4 like "my-host.cache.aws.com:11211" or bracketed IPv6 like "[::1]:11211"
+        ENDPOINT_REGEX = /^([-_.a-zA-Z0-9]+|\[[a-fA-F0-9:]+\])(?::(\d+))?$/
 
-        def initialize(addr)
+        def initialize(addr, timeout: nil)
           @host, @port = parse_endpoint_address(addr)
+          @timeout = timeout
         end
 
         DEFAULT_PORT = 11_211
@@ -29,12 +30,12 @@ module Dalli
 
         # A cached ElastiCache::StatsResponse
         def stats
-          @stats ||= StatsCommand.new(@host, @port).response
+          @stats ||= StatsCommand.new(@host, @port, @timeout).response
         end
 
         # A cached ElastiCache::ConfigResponse
         def config
-          @config ||= ConfigCommand.new(@host, @port, engine_version).response
+          @config ||= ConfigCommand.new(@host, @port, @timeout).response
         end
 
         # The memcached engine version

@@ -5,13 +5,13 @@ on: [push, pull_request]
 jobs:
   lint:
     runs-on: ubuntu-latest
-    name: Lint - Ruby 2.6
+    name: Lint - Ruby 3.3
     steps:
     - uses: actions/checkout@v6
-    - name: Set up Ruby 2.6
+    - name: Set up Ruby 3.3
       uses: ruby/setup-ruby@v1
       with:
-        ruby-version: 2.6
+        ruby-version: '3.3'
         bundler-cache: true # 'bundle install' and cache
     - name: Run Rubocop
       run: bundle exec rubocop
