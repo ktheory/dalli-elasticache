@@ -45,7 +45,7 @@ describe 'Dalli::ElastiCache::Endpoint' do
 
     before do
       allow(Dalli::Elasticache::AutoDiscovery::Endpoint).to receive(:new)
-        .with(config_endpoint, timeout: Dalli::ElastiCache::DEFAULT_TIMEOUT).and_return(stub_endpoint)
+        .with(config_endpoint, timeout: Dalli::ElastiCache::DEFAULT_TIMEOUT, ssl_context: nil).and_return(stub_endpoint)
       allow(stub_endpoint).to receive(:config).and_return(response)
       allow(Dalli::Client).to receive(:new)
         .with(['mycluster.0001.cache.amazonaws.com:11211',
@@ -70,7 +70,7 @@ describe 'Dalli::ElastiCache::Endpoint' do
 
     before do
       allow(Dalli::Elasticache::AutoDiscovery::Endpoint).to receive(:new)
-        .with(config_endpoint, timeout: Dalli::ElastiCache::DEFAULT_TIMEOUT).and_return(stub_endpoint)
+        .with(config_endpoint, timeout: Dalli::ElastiCache::DEFAULT_TIMEOUT, ssl_context: nil).and_return(stub_endpoint)
       allow(stub_endpoint).to receive(:config).and_return(response)
     end
 
@@ -80,7 +80,7 @@ describe 'Dalli::ElastiCache::Endpoint' do
                                    'mycluster.0003.cache.amazonaws.com:11211']
       expect(stub_endpoint).to have_received(:config)
       expect(Dalli::Elasticache::AutoDiscovery::Endpoint).to have_received(:new)
-        .with(config_endpoint, timeout: Dalli::ElastiCache::DEFAULT_TIMEOUT)
+        .with(config_endpoint, timeout: Dalli::ElastiCache::DEFAULT_TIMEOUT, ssl_context: nil)
     end
   end
 
@@ -124,6 +124,27 @@ describe 'Dalli::ElastiCache::Endpoint' do
       cache.refresh
       expect(cache.endpoint.host).to eq(stale_endpoint.host)
       expect(cache.endpoint.port).to eq(stale_endpoint.port)
+    end
+  end
+
+  describe 'TLS support' do
+    let(:ssl_context) { instance_double(OpenSSL::SSL::SSLContext) }
+    let(:tls_cache) { Dalli::ElastiCache.new(config_endpoint, dalli_options, ssl_context:) }
+
+    it 'passes ssl_context to the endpoint' do
+      allow(Dalli::Elasticache::AutoDiscovery::Endpoint).to receive(:new)
+        .with(config_endpoint, timeout: Dalli::ElastiCache::DEFAULT_TIMEOUT, ssl_context:)
+        .and_call_original
+      tls_cache
+      expect(Dalli::Elasticache::AutoDiscovery::Endpoint).to have_received(:new)
+        .with(config_endpoint, timeout: Dalli::ElastiCache::DEFAULT_TIMEOUT, ssl_context:)
+    end
+
+    it 'preserves ssl_context across refresh' do
+      stale_endpoint = tls_cache.endpoint
+      tls_cache.refresh
+      expect(tls_cache.endpoint).not_to eq(stale_endpoint)
+      expect(tls_cache.endpoint.host).to eq(stale_endpoint.host)
     end
   end
 end

@@ -87,4 +87,28 @@ describe 'Dalli::Elasticache::AutoDiscovery::StatsCommand' do
       expect(mock_socket).to have_received(:puts).with(cmd)
     end
   end
+
+  context 'when an ssl_context is provided' do
+    let(:ssl_context) { instance_double(OpenSSL::SSL::SSLContext) }
+    let(:command) { Dalli::Elasticache::AutoDiscovery::StatsCommand.new(host, port, nil, ssl_context:) }
+    let(:mock_ssl_socket) { instance_double(OpenSSL::SSL::SSLSocket) }
+
+    before do
+      allow(OpenSSL::SSL::SSLSocket).to receive(:new).with(mock_socket, ssl_context).and_return(mock_ssl_socket)
+      allow(mock_ssl_socket).to receive(:hostname=).with(host)
+      allow(mock_ssl_socket).to receive(:sync_close=).with(true)
+      allow(mock_ssl_socket).to receive(:connect)
+      allow(mock_ssl_socket).to receive(:close)
+      allow(mock_ssl_socket).to receive(:puts).with(cmd)
+      allow(mock_ssl_socket).to receive(:readline).and_return(*socket_response_lines)
+    end
+
+    it 'wraps the TCP socket with SSL and parses out the engine version' do
+      response = command.response
+      expect(response.engine_version).to eq(engine_version)
+      expect(OpenSSL::SSL::SSLSocket).to have_received(:new).with(mock_socket, ssl_context)
+      expect(mock_ssl_socket).to have_received(:connect)
+      expect(mock_ssl_socket).to have_received(:close)
+    end
+  end
 end
