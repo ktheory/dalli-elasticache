@@ -24,12 +24,12 @@ module Dalli
         # Returns the raw response as a String
         def send_command
           tcp_socket = ::Socket.tcp(@host, @port, connect_timeout: timeout)
-          socket = ssl_context ? wrap_with_ssl(tcp_socket) : tcp_socket
           begin
+            socket = ssl_context ? wrap_with_ssl(tcp_socket) : tcp_socket
             socket.puts command
             response_from_socket(socket)
           ensure
-            socket.close
+            (socket || tcp_socket).close
           end
         end
 
