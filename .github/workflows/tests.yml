@@ -8,7 +8,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ruby-version: ['3.3', '3.4', ruby-head, jruby-head]
+        ruby-version: ['3.3', '3.4', '4.0', ruby-head, jruby-head]
 
     name: Specs - Ruby ${{ matrix.ruby-version }}
     steps:
