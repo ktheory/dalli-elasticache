@@ -6,10 +6,10 @@ describe 'Dalli::Elasticache::AutoDiscovery::Node' do
   context 'when comparing with equals' do
     let(:host1) { Faker::Internet.domain_name(subdomain: true) }
     let(:ip1) { Faker::Internet.public_ip_v4_address }
-    let(:port1) { rand(1024..16_023) }
-    let(:host2) { Faker::Internet.domain_name(subdomain: true) }
-    let(:ip2) { Faker::Internet.public_ip_v4_address }
-    let(:port2) { rand(1024..16_023) }
+    let(:port1) { rand(1024..16_022) }
+    let(:host2) { "other.#{host1}" }
+    let(:ip2) { ip1 == '1.2.3.4' ? '1.2.3.5' : '1.2.3.4' }
+    let(:port2) { port1 + 1 }
 
     let(:node1a) { Dalli::Elasticache::AutoDiscovery::Node.new(host1, ip1, port1) }
     let(:node1b) { Dalli::Elasticache::AutoDiscovery::Node.new(host1, ip1, port1) }
@@ -36,10 +36,10 @@ describe 'Dalli::Elasticache::AutoDiscovery::Node' do
   context 'when used as a hash key' do
     let(:host1) { Faker::Internet.domain_name(subdomain: true) }
     let(:ip1) { Faker::Internet.public_ip_v4_address }
-    let(:port1) { rand(1024..16_023) }
-    let(:host2) { Faker::Internet.domain_name(subdomain: true) }
-    let(:ip2) { Faker::Internet.public_ip_v4_address }
-    let(:port2) { rand(1024..16_023) }
+    let(:port1) { rand(1024..16_022) }
+    let(:host2) { "other.#{host1}" }
+    let(:ip2) { ip1 == '1.2.3.4' ? '1.2.3.5' : '1.2.3.4' }
+    let(:port2) { port1 + 1 }
 
     let(:node1a) { Dalli::Elasticache::AutoDiscovery::Node.new(host1, ip1, port1) }
     let(:node1b) { Dalli::Elasticache::AutoDiscovery::Node.new(host1, ip1, port1) }

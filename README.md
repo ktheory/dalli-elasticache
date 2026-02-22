@@ -89,6 +89,57 @@ elasticache.refresh
 elasticache.refresh.client
 ```
 
+### TLS
+
+Pass an `OpenSSL::SSL::SSLContext` via `ssl_context:` to enable TLS for the auto-discovery connection. This uses the same interface as Dalli's own TLS support.
+
+```ruby
+ssl_context = OpenSSL::SSL::SSLContext.new
+ssl_context.verify_mode = OpenSSL::SSL::VERIFY_PEER
+
+elasticache = Dalli::ElastiCache.new(
+  "my-cluster.abc123.cfg.use1.cache.amazonaws.com:11211",
+  { expires_in: 1.day },
+  ssl_context: ssl_context
+)
+```
+
+Note that `ssl_context:` controls TLS for the auto-discovery endpoint only. To also encrypt traffic to the cache nodes themselves, pass `ssl_context:` in the Dalli options as well:
+
+```ruby
+elasticache = Dalli::ElastiCache.new(endpoint, { ssl_context: ssl_context }, ssl_context: ssl_context)
+```
+
+### Refreshing the Node List
+
+The node list is fetched once and cached. Call `#refresh` to re-query the endpoint, which creates a new `Dalli::Client` with the current node list.
+
+Two common patterns for keeping the node list up to date:
+
+**On failure** — rescue `Dalli::RingError` (raised when no nodes are reachable) and refresh before retrying:
+
+```ruby
+begin
+  cache.get("key")
+rescue Dalli::RingError
+  elasticache.refresh
+  retry
+end
+```
+
+**On a schedule** — refresh periodically in a background thread or job. AWS does not publish exact timing for node replacement, but the process typically takes a few minutes, so refreshing every 60 seconds is a reasonable default:
+
+```ruby
+Thread.new do
+  loop do
+    sleep 60
+    elasticache.refresh
+  end
+end
+```
+
+A combination of both approaches is reasonable for production use.
+
 License
 -------
 
