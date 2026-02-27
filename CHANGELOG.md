@@ -5,7 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.0.0]
+## [2.0.0]
+
+### Added
+
+- TCP connect and read timeout (default 5s) for auto-discovery calls. [@petergoldstein](https://github.com/petergoldstein)
+- IPv6 endpoint support (bracketed addresses like `[::1]:11211`). [@petergoldstein](https://github.com/petergoldstein)
+- TLS support for auto-discovery endpoint via `ssl_context:` keyword argument. [@petergoldstein](https://github.com/petergoldstein)
+
+### Removed
+
+- Legacy config command path for engines < 1.4.14. [@petergoldstein](https://github.com/petergoldstein)
+- Support for Ruby < 3.3. [@petergoldstein](https://github.com/petergoldstein)
+
+### Changed
+
+- Fix `Dalli::Socket` shadowing `::Socket` in `BaseCommand`. [@petergoldstein](https://github.com/petergoldstein)
+- Version requirements: Ruby v3.3+, and Dalli v5.0+. [@petergoldstein](https://github.com/petergoldstein)
+
+## [1.0.1]
 
 ### Fixed
 
@@ -13,7 +31,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.0.0]
 
-### Added 
+### Added
 
 - Rubocop linting. [@petergoldstein](https://github.com/petergoldstein)
 - Specs for reading data off the socket, to ensure that code functions as expected. [@petergoldstein](https://github.com/petergoldstein)
@@ -33,7 +51,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Dalli::Elasticache now raises an ArgumentError if it cannot parse the config endpoint argument. [@petergoldstein](https://github.com/petergoldstein)
 - Now use default port of 11211 for configuration endpoint when not explicitly specified. [@petergoldstein](https://github.com/petergoldstein)
 - Refactored internal classes to better enable testing, shrink individual class responsibilities. [@petergoldstein](https://github.com/petergoldstein)
-- Allow underscores in hostnames. 
+- Allow underscores in hostnames.
 
 ### Removed
 
