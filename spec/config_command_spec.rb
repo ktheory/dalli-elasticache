@@ -96,6 +96,11 @@ describe 'Dalli::Elasticache::AutoDiscovery::ConfigCommand' do
       end
 
       context 'when the SSL socket has no buffered data and the read times out' do
+        # SSLSocket did not expose wait_readable as an instance method before Ruby 3.4, so
+        # instance_double would reject the stub on older Rubies. A plain double is used here
+        # to keep the test version-agnostic.
+        let(:mock_ssl_socket) { double('ssl_socket') }
+
         before do
           allow(mock_ssl_socket).to receive(:pending).and_return(0)
           allow(mock_ssl_socket).to receive(:wait_readable).with(5).and_return(nil)
