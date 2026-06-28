@@ -133,7 +133,7 @@ describe 'Dalli::Elasticache::AutoDiscovery::StatsCommand' do
         # SSLSocket did not expose wait_readable as an instance method before Ruby 3.4, so
         # instance_double would reject the stub on older Rubies. A plain double is used here
         # to keep the test version-agnostic.
-        let(:mock_ssl_socket) { double('ssl_socket') }
+        let(:mock_ssl_socket) { double('ssl_socket') } # rubocop:disable RSpec/VerifiedDoubles
 
         before do
           allow(mock_ssl_socket).to receive(:pending).and_return(0)
