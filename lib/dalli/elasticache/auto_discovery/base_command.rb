@@ -58,6 +58,10 @@ module Dalli
 
         def wait_for_data(socket)
           return unless timeout
+          # SSLSocket buffers decrypted data internally; wait_readable polls the raw TCP fd
+          # and misses data already consumed from it by OpenSSL. Skip the wait when the SSL
+          # layer already has bytes ready.
+          return if socket.respond_to?(:pending) && socket.pending.positive?
 
           raise Timeout::Error, "Auto discovery read timed out after #{timeout}s" unless socket.wait_readable(timeout)
         end

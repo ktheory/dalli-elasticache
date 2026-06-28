@@ -110,5 +110,35 @@ describe 'Dalli::Elasticache::AutoDiscovery::StatsCommand' do
       expect(mock_ssl_socket).to have_received(:connect)
       expect(mock_ssl_socket).to have_received(:close)
     end
+
+    context 'with a timeout' do
+      let(:command) { Dalli::Elasticache::AutoDiscovery::StatsCommand.new(host, port, 5, ssl_context:) }
+
+      before do
+        allow(Socket).to receive(:tcp).with(host, port, connect_timeout: 5).and_return(mock_socket)
+      end
+
+      context 'when the SSL socket has data buffered in OpenSSL (pending > 0)' do
+        before { allow(mock_ssl_socket).to receive(:pending).and_return(1) }
+
+        # wait_readable is not stubbed; instance_double raises if it were called unexpectedly,
+        # so a passing test proves wait_readable is skipped.
+        it 'skips wait_readable and returns a StatsResponse' do
+          response = command.response
+          expect(response.engine_version).to eq(engine_version)
+        end
+      end
+
+      context 'when the SSL socket has no buffered data and the read times out' do
+        before do
+          allow(mock_ssl_socket).to receive(:pending).and_return(0)
+          allow(mock_ssl_socket).to receive(:wait_readable).with(5).and_return(nil)
+        end
+
+        it 'raises Timeout::Error' do
+          expect { command.response }.to raise_error(Timeout::Error, /timed out after 5s/)
+        end
+      end
+    end
   end
 end
