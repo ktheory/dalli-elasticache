@@ -34,6 +34,11 @@ module Dalli
           end
         end
 
+        # `timeout` bounds the entire multi-line read as a single wall-clock deadline,
+        # not each individual `readline`. A per-line readiness check (e.g. `wait_readable`)
+        # can't tell buffered-but-unread bytes apart from an empty socket once a buffering
+        # layer (Ruby's IO buffer, or OpenSSL::Buffering for TLS) sits between the fd and
+        # `readline`, so it can't be used to gate individual lines reliably.
         def response_from_socket(socket)
           return read_lines(socket) unless timeout
 

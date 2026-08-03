@@ -116,10 +116,10 @@ describe 'Dalli::Elasticache::AutoDiscovery::ConfigCommand' do
         allow(Socket).to receive(:tcp).with(host, port, connect_timeout: 5).and_return(mock_socket)
       end
 
-      # pending/wait_readable are not stubbed; instance_double raises if either were called,
-      # so a passing test proves the read no longer polls socket readiness between lines
-      # (the bug in #65: SSL-decrypted data buffered above SSLSocket#pending caused every
-      # line after the first to block for the full timeout).
+      # The fix for #65 replaced per-line readiness gating (SSLSocket#pending / wait_readable)
+      # with a Timeout.timeout deadline around the whole read, so this code path never calls
+      # pending or wait_readable at all. Leaving both unstubbed on this instance_double means
+      # the test fails if either is ever invoked, proving that.
       it 'returns a ConfigResponse without polling socket readiness between lines' do
         response = command.response
         expect(response).to be_a Dalli::Elasticache::AutoDiscovery::ConfigResponse
