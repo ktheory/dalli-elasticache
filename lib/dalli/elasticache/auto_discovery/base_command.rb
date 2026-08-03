@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'openssl'
+require 'timeout'
 
 module Dalli
   module Elasticache
@@ -34,19 +35,25 @@ module Dalli
         end
 
         def response_from_socket(socket)
+          return read_lines(socket) unless timeout
+
+          Timeout.timeout(timeout, Timeout::Error, "Auto discovery read timed out after #{timeout}s") do
+            read_lines(socket)
+          end
+        end
+
+        private
+
+        def read_lines(socket)
           data = +''
           loop do
-            wait_for_data(socket)
             line = socket.readline
             break if line.include?('END')
 
             data << line
           end
-
           data
         end
-
-        private
 
         def wrap_with_ssl(tcp_socket)
           ssl_socket = OpenSSL::SSL::SSLSocket.new(tcp_socket, ssl_context)
@@ -54,16 +61,6 @@ module Dalli
           ssl_socket.sync_close = true
           ssl_socket.connect
           ssl_socket
-        end
-
-        def wait_for_data(socket)
-          return unless timeout
-          # SSLSocket buffers decrypted data internally; wait_readable polls the raw TCP fd
-          # and misses data already consumed from it by OpenSSL. Skip the wait when the SSL
-          # layer already has bytes ready.
-          return if socket.respond_to?(:pending) && socket.pending.positive?
-
-          raise Timeout::Error, "Auto discovery read timed out after #{timeout}s" unless socket.wait_readable(timeout)
         end
       end
     end

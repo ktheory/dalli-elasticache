@@ -88,6 +88,38 @@ describe 'Dalli::Elasticache::AutoDiscovery::StatsCommand' do
     end
   end
 
+  context 'with a read timeout' do
+    let(:command) { Dalli::Elasticache::AutoDiscovery::StatsCommand.new(host, port, read_timeout) }
+
+    before do
+      allow(Socket).to receive(:tcp).with(host, port, connect_timeout: read_timeout).and_return(mock_socket)
+    end
+
+    context 'when all lines are read before the timeout elapses' do
+      let(:read_timeout) { 5 }
+
+      it 'parses out the engine version' do
+        response = command.response
+        expect(response.engine_version).to eq(engine_version)
+      end
+    end
+
+    context 'when the read does not complete before the timeout elapses' do
+      let(:read_timeout) { 0.01 }
+
+      before do
+        allow(mock_socket).to receive(:readline) do
+          sleep 0.05
+          socket_response_lines.first
+        end
+      end
+
+      it 'raises Timeout::Error' do
+        expect { command.response }.to raise_error(Timeout::Error, /timed out after 0.01s/)
+      end
+    end
+  end
+
   context 'when an ssl_context is provided' do
     let(:ssl_context) { instance_double(OpenSSL::SSL::SSLContext) }
     let(:command) { Dalli::Elasticache::AutoDiscovery::StatsCommand.new(host, port, nil, ssl_context:) }
@@ -118,31 +150,13 @@ describe 'Dalli::Elasticache::AutoDiscovery::StatsCommand' do
         allow(Socket).to receive(:tcp).with(host, port, connect_timeout: 5).and_return(mock_socket)
       end
 
-      context 'when the SSL socket has data buffered in OpenSSL (pending > 0)' do
-        before { allow(mock_ssl_socket).to receive(:pending).and_return(1) }
-
-        # wait_readable is not stubbed; instance_double raises if it were called unexpectedly,
-        # so a passing test proves wait_readable is skipped.
-        it 'skips wait_readable and returns a StatsResponse' do
-          response = command.response
-          expect(response.engine_version).to eq(engine_version)
-        end
-      end
-
-      context 'when the SSL socket has no buffered data and the read times out' do
-        # SSLSocket did not expose wait_readable as an instance method before Ruby 3.4, so
-        # instance_double would reject the stub on older Rubies. A plain double is used here
-        # to keep the test version-agnostic.
-        let(:mock_ssl_socket) { double('ssl_socket') } # rubocop:disable RSpec/VerifiedDoubles
-
-        before do
-          allow(mock_ssl_socket).to receive(:pending).and_return(0)
-          allow(mock_ssl_socket).to receive(:wait_readable).with(5).and_return(nil)
-        end
-
-        it 'raises Timeout::Error' do
-          expect { command.response }.to raise_error(Timeout::Error, /timed out after 5s/)
-        end
+      # pending/wait_readable are not stubbed; instance_double raises if either were called,
+      # so a passing test proves the read no longer polls socket readiness between lines
+      # (the bug in #65: SSL-decrypted data buffered above SSLSocket#pending caused every
+      # line after the first to block for the full timeout).
+      it 'parses out the engine version without polling socket readiness between lines' do
+        response = command.response
+        expect(response.engine_version).to eq(engine_version)
       end
     end
   end
