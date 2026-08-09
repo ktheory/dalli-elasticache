@@ -50,6 +50,40 @@ describe 'Dalli::Elasticache::AutoDiscovery::ConfigCommand' do
     expect(mock_socket).to have_received(:close)
   end
 
+  context 'with a read timeout' do
+    let(:command) { Dalli::Elasticache::AutoDiscovery::ConfigCommand.new(host, port, read_timeout) }
+
+    before do
+      allow(Socket).to receive(:tcp).with(host, port, connect_timeout: read_timeout).and_return(mock_socket)
+    end
+
+    context 'when all lines are read before the timeout elapses' do
+      let(:read_timeout) { 5 }
+
+      it 'returns a ConfigResponse' do
+        response = command.response
+        expect(response).to be_a Dalli::Elasticache::AutoDiscovery::ConfigResponse
+        expect(response.version).to eq(12)
+        expect(response.nodes).to eq(expected_nodes)
+      end
+    end
+
+    context 'when the read does not complete before the timeout elapses' do
+      let(:read_timeout) { 0.01 }
+
+      before do
+        allow(mock_socket).to receive(:readline) do
+          sleep 0.05
+          socket_response_lines.first
+        end
+      end
+
+      it 'raises Timeout::Error' do
+        expect { command.response }.to raise_error(Timeout::Error, /timed out after 0.01s/)
+      end
+    end
+  end
+
   context 'when an ssl_context is provided' do
     let(:ssl_context) { instance_double(OpenSSL::SSL::SSLContext) }
     let(:command) { Dalli::Elasticache::AutoDiscovery::ConfigCommand.new(host, port, nil, ssl_context:) }
@@ -73,6 +107,25 @@ describe 'Dalli::Elasticache::AutoDiscovery::ConfigCommand' do
       expect(OpenSSL::SSL::SSLSocket).to have_received(:new).with(mock_socket, ssl_context)
       expect(mock_ssl_socket).to have_received(:connect)
       expect(mock_ssl_socket).to have_received(:close)
+    end
+
+    context 'with a timeout' do
+      let(:command) { Dalli::Elasticache::AutoDiscovery::ConfigCommand.new(host, port, 5, ssl_context:) }
+
+      before do
+        allow(Socket).to receive(:tcp).with(host, port, connect_timeout: 5).and_return(mock_socket)
+      end
+
+      # The fix for #65 replaced per-line readiness gating (SSLSocket#pending / wait_readable)
+      # with a Timeout.timeout deadline around the whole read, so this code path never calls
+      # pending or wait_readable at all. Leaving both unstubbed on this instance_double means
+      # the test fails if either is ever invoked, proving that.
+      it 'returns a ConfigResponse without polling socket readiness between lines' do
+        response = command.response
+        expect(response).to be_a Dalli::Elasticache::AutoDiscovery::ConfigResponse
+        expect(response.version).to eq(12)
+        expect(response.nodes).to eq(expected_nodes)
+      end
     end
   end
 end

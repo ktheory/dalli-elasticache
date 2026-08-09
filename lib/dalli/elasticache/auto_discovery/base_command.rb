@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'openssl'
+require 'timeout'
 
 module Dalli
   module Elasticache
@@ -33,20 +34,31 @@ module Dalli
           end
         end
 
+        # `timeout` bounds the entire multi-line read as a single wall-clock deadline,
+        # not each individual `readline`. A per-line readiness check (e.g. `wait_readable`)
+        # can't tell buffered-but-unread bytes apart from an empty socket once a buffering
+        # layer (Ruby's IO buffer, or OpenSSL::Buffering for TLS) sits between the fd and
+        # `readline`, so it can't be used to gate individual lines reliably.
         def response_from_socket(socket)
+          return read_lines(socket) unless timeout
+
+          Timeout.timeout(timeout, Timeout::Error, "Auto discovery read timed out after #{timeout}s") do
+            read_lines(socket)
+          end
+        end
+
+        private
+
+        def read_lines(socket)
           data = +''
           loop do
-            wait_for_data(socket)
             line = socket.readline
             break if line.include?('END')
 
             data << line
           end
-
           data
         end
-
-        private
 
         def wrap_with_ssl(tcp_socket)
           ssl_socket = OpenSSL::SSL::SSLSocket.new(tcp_socket, ssl_context)
@@ -54,12 +66,6 @@ module Dalli
           ssl_socket.sync_close = true
           ssl_socket.connect
           ssl_socket
-        end
-
-        def wait_for_data(socket)
-          return unless timeout
-
-          raise Timeout::Error, "Auto discovery read timed out after #{timeout}s" unless socket.wait_readable(timeout)
         end
       end
     end
