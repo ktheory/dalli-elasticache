@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.2]
+
+### Fixed
+
+- Read timeout over TLS (`ssl_context:`) could block for the full timeout on every line after the first. `wait_readable` polled the raw TCP fd for readiness, which can't see data already buffered above it by OpenSSL, so it waited out the full timeout instead of returning immediately. Read timeouts are now enforced as a single deadline around the whole response rather than gating each line's readiness. [@petergoldstein](https://github.com/petergoldstein)
+
 ## [2.0.1]
 
 ### Fixed
