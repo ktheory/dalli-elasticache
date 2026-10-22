@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Bracketed IPv6 configuration endpoints (e.g. `[::1]:11211`) were parsed but could never connect, because the brackets were passed through to address resolution. The brackets are now stripped before connecting, and SNI is no longer set when the host is an IP literal. [@petergoldstein](https://github.com/petergoldstein)
 - An `ERROR`, `CLIENT_ERROR`, or `SERVER_ERROR` reply from the endpoint was not recognized, so discovery blocked until the read timeout (or indefinitely with `timeout: nil`). These replies now raise `Dalli::Elasticache::AutoDiscovery::ResponseError` immediately. The response terminator is now matched exactly instead of any line containing `END`. [@petergoldstein](https://github.com/petergoldstein)
+- The TLS handshake with the configuration endpoint had no timeout, so an endpoint that accepted the TCP connection but never completed the handshake blocked discovery indefinitely, regardless of `timeout:`. The handshake is now bounded by `timeout:` and raises `Timeout::Error`. [@petergoldstein](https://github.com/petergoldstein)
+- Node lists from IPv6 clusters, nodes reported without an IP address, and hostnames containing underscores were silently parsed as an empty list, producing a Dalli client with no servers that only failed on first use with `Dalli::RingError`. These nodes now parse correctly, and `#servers` (and therefore `#client`) raises `Dalli::Elasticache::AutoDiscovery::ResponseError` if a response contains no nodes. [@petergoldstein](https://github.com/petergoldstein)
 
 ### Security
 
