@@ -22,7 +22,7 @@ module Dalli
   # distributes cached items consistently over the nodes.
   ##
   class ElastiCache
-    DEFAULT_TIMEOUT = 5
+    DEFAULT_TIMEOUT = Dalli::Elasticache::AutoDiscovery::BaseCommand::DEFAULT_TIMEOUT
 
     attr_reader :endpoint, :options
 

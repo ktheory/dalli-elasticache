@@ -17,7 +17,8 @@ module Dalli
         end
 
         def ==(other)
-          host == other.host &&
+          other.is_a?(Node) &&
+            host == other.host &&
             ip == other.ip &&
             port == other.port
         end
