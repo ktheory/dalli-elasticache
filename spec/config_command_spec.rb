@@ -85,7 +85,7 @@ describe 'Dalli::Elasticache::AutoDiscovery::ConfigCommand' do
   end
 
   context 'when an ssl_context is provided' do
-    let(:ssl_context) { instance_double(OpenSSL::SSL::SSLContext) }
+    let(:ssl_context) { instance_double(OpenSSL::SSL::SSLContext, verify_mode: OpenSSL::SSL::VERIFY_PEER) }
     let(:command) { Dalli::Elasticache::AutoDiscovery::ConfigCommand.new(host, port, nil, ssl_context:) }
     let(:mock_ssl_socket) { instance_double(OpenSSL::SSL::SSLSocket) }
 
@@ -94,6 +94,7 @@ describe 'Dalli::Elasticache::AutoDiscovery::ConfigCommand' do
       allow(mock_ssl_socket).to receive(:hostname=).with(host)
       allow(mock_ssl_socket).to receive(:sync_close=).with(true)
       allow(mock_ssl_socket).to receive(:connect)
+      allow(mock_ssl_socket).to receive(:post_connection_check).with(host)
       allow(mock_ssl_socket).to receive(:close)
       allow(mock_ssl_socket).to receive(:puts).with(Dalli::Elasticache::AutoDiscovery::ConfigCommand::CONFIG_COMMAND)
       allow(mock_ssl_socket).to receive(:readline).and_return(*socket_response_lines)
@@ -106,7 +107,33 @@ describe 'Dalli::Elasticache::AutoDiscovery::ConfigCommand' do
       expect(response.nodes).to eq(expected_nodes)
       expect(OpenSSL::SSL::SSLSocket).to have_received(:new).with(mock_socket, ssl_context)
       expect(mock_ssl_socket).to have_received(:connect)
+      expect(mock_ssl_socket).to have_received(:post_connection_check).with(host)
       expect(mock_ssl_socket).to have_received(:close)
+    end
+
+    context 'when the context does not verify the peer' do
+      let(:ssl_context) { instance_double(OpenSSL::SSL::SSLContext, verify_mode: OpenSSL::SSL::VERIFY_NONE) }
+
+      it 'skips the hostname check' do
+        command.response
+        expect(mock_ssl_socket).not_to have_received(:post_connection_check)
+      end
+    end
+
+    context 'when the host is a bracketed IPv6 address' do
+      let(:host) { '[2001:db8::1]' }
+
+      before do
+        allow(Socket).to receive(:tcp).with('2001:db8::1', port, connect_timeout: nil).and_return(mock_socket)
+        allow(mock_ssl_socket).to receive(:post_connection_check).with('2001:db8::1')
+      end
+
+      it 'connects and verifies using the unbracketed address without setting SNI' do
+        command.response
+        expect(Socket).to have_received(:tcp).with('2001:db8::1', port, connect_timeout: nil)
+        expect(mock_ssl_socket).not_to have_received(:hostname=)
+        expect(mock_ssl_socket).to have_received(:post_connection_check).with('2001:db8::1')
+      end
     end
 
     context 'with a timeout' do
