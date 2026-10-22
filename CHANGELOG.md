@@ -14,7 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security
 
-- With `ssl_context:` set to `VERIFY_PEER`, the endpoint certificate was checked against the trusted CAs but not against the endpoint hostname, because `SSLContext.new` leaves `verify_hostname` false. Any certificate from a trusted CA was accepted for any host. The hostname is now verified whenever the peer is verified. [@petergoldstein](https://github.com/petergoldstein)
+- With `ssl_context:` set to `VERIFY_PEER`, the endpoint certificate was checked against the trusted CAs but not against the endpoint hostname, because `SSLContext.new` leaves `verify_hostname` false. Any certificate from a trusted CA was accepted for any host. The hostname (or IP address) is now verified whenever `verify_mode` includes `VERIFY_PEER`, even if `verify_hostname` is false, since an explicit `false` can't be distinguished from the default. Connections that relied on a certificate not matching the endpoint host will now fail. [@petergoldstein](https://github.com/petergoldstein)
 
 ## [2.0.2]
 
