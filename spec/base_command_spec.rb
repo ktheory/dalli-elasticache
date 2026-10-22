@@ -148,6 +148,28 @@ describe 'Dalli::Elasticache::AutoDiscovery::BaseCommand' do
       end
     end
 
+    context 'when the server accepts the connection but never completes the handshake' do
+      let(:certificate) { self_signed_certificate(key, 'IP:127.0.0.1') }
+      let(:command) do
+        Dalli::Elasticache::AutoDiscovery::ConfigCommand.new('127.0.0.1', server.addr[1], 0.5,
+                                                             ssl_context: client_context)
+      end
+
+      it 'raises Timeout::Error once the timeout elapses' do
+        serve_once(server, config_response) { |client| client.tap { sleep } }
+        result = Thread.new do
+          command.response
+        rescue StandardError => e
+          e
+        end
+
+        expect(result.join(3)&.value).to be_a(Timeout::Error)
+        expect(result.value.message).to match(/TLS handshake timed out after 0.5s/)
+      ensure
+        result&.kill
+      end
+    end
+
     context 'when the client context does not verify the peer' do
       let(:certificate) { self_signed_certificate(key, 'DNS:other.example.com') }
       let(:client_context) { OpenSSL::SSL::SSLContext.new }

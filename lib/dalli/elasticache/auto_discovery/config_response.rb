@@ -14,8 +14,9 @@ module Dalli
         # Matches the version line of the response
         VERSION_REGEX = /^(\d+)\r?\n/
 
-        # Matches strings like "my-cluster.001.cache.aws.com|10.154.182.29|11211"
-        NODE_REGEX = /(([-.a-zA-Z0-9]+)\|(\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b)\|(\d+))/
+        # Matches strings like "my-cluster.001.cache.aws.com|10.154.182.29|11211".
+        # The IP may be IPv4, IPv6, or empty; only the host and port are used to connect.
+        NODE_REGEX = /(([-.\w]+)\|([^|\s]*)\|(\d+))/
         NODE_LIST_REGEX = /^(#{NODE_REGEX}\s*)+$/
 
         def initialize(response_text)

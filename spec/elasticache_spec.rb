@@ -82,6 +82,14 @@ describe 'Dalli::ElastiCache::Endpoint' do
       expect(Dalli::Elasticache::AutoDiscovery::Endpoint).to have_received(:new)
         .with(config_endpoint, timeout: Dalli::ElastiCache::DEFAULT_TIMEOUT, ssl_context: nil)
     end
+
+    context 'when no nodes can be parsed from the response' do
+      let(:response) { Dalli::Elasticache::AutoDiscovery::ConfigResponse.new("CONFIG cluster 0 4\r\n12\r\n\r\n\r\n") }
+
+      it 'raises ResponseError instead of returning an empty list' do
+        expect { cache.servers }.to raise_error(Dalli::Elasticache::AutoDiscovery::ResponseError, /no cache nodes/i)
+      end
+    end
   end
 
   describe '#version' do

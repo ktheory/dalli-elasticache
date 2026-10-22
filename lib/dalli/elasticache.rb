@@ -66,8 +66,17 @@ module Dalli
 
     # List of cluster server nodes with ip addresses and ports
     # Always use host name instead of private elasticache IPs as internal IPs can change after a node is rebooted
+    #
+    # Raises Dalli::Elasticache::AutoDiscovery::ResponseError if the response contains
+    # no nodes, rather than handing Dalli an empty server list that only fails on first use
     def servers
-      endpoint.config.nodes.map(&:to_s)
+      nodes = endpoint.config.nodes
+      if nodes.empty?
+        raise Dalli::Elasticache::AutoDiscovery::ResponseError,
+              "No cache nodes found in auto discovery response from #{endpoint.host}:#{endpoint.port}"
+      end
+
+      nodes.map(&:to_s)
     end
 
     # Clear all cached data from the cluster endpoint

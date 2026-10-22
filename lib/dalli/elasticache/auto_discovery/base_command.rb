@@ -50,14 +50,16 @@ module Dalli
         # layer (Ruby's IO buffer, or OpenSSL::Buffering for TLS) sits between the fd and
         # `readline`, so it can't be used to gate individual lines reliably.
         def response_from_socket(socket)
-          return read_lines(socket) unless timeout
-
-          Timeout.timeout(timeout, Timeout::Error, "Auto discovery read timed out after #{timeout}s") do
-            read_lines(socket)
-          end
+          with_timeout('read') { read_lines(socket) }
         end
 
         private
+
+        def with_timeout(phase, &)
+          return yield unless timeout
+
+          Timeout.timeout(timeout, Timeout::Error, "Auto discovery #{phase} timed out after #{timeout}s", &)
+        end
 
         # The host without the brackets used to delimit an IPv6 address from its port
         def socket_host
@@ -88,7 +90,8 @@ module Dalli
           # SNI must be a DNS name (RFC 6066), never an IP literal
           ssl_socket.hostname = socket_host unless ip_address?(socket_host)
           ssl_socket.sync_close = true
-          ssl_socket.connect
+          # connect_timeout only covers the TCP connect, so bound the handshake separately
+          with_timeout('TLS handshake') { ssl_socket.connect }
           verify_hostname(ssl_socket)
           ssl_socket
         end
