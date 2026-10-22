@@ -28,6 +28,20 @@ describe 'Dalli::Elasticache::AutoDiscovery::BaseCommand' do
     end
   end
 
+  describe 'timeouts' do
+    before { allow(Socket).to receive(:tcp).and_raise(Socket::ResolutionError.new('stubbed')) }
+
+    it 'defaults to 5 seconds' do
+      expect(Dalli::Elasticache::AutoDiscovery::ConfigCommand.new('example.com', 11_211).timeout).to eq(5)
+    end
+
+    it 'applies the timeout to DNS resolution as well as the TCP connect' do
+      command = Dalli::Elasticache::AutoDiscovery::ConfigCommand.new('example.com', 11_211, 2)
+      expect { command.response }.to raise_error(Socket::ResolutionError)
+      expect(Socket).to have_received(:tcp).with('example.com', 11_211, connect_timeout: 2, resolv_timeout: 2)
+    end
+  end
+
   describe 'bracketed IPv6 endpoints' do
     let(:server) do
       TCPServer.new('::1', 0)
@@ -77,6 +91,44 @@ describe 'Dalli::Elasticache::AutoDiscovery::BaseCommand' do
       ensure
         result&.kill
       end
+    end
+
+    context 'when the response exceeds the size limit' do
+      let(:timeout) { 3 }
+      let(:limit) { Dalli::Elasticache::AutoDiscovery::BaseCommand::MAX_RESPONSE_BYTES }
+
+      def response_within(seconds)
+        result = Thread.new do
+          command.response
+        rescue StandardError => e
+          e
+        end
+        result.join(seconds)&.value
+      ensure
+        result&.kill
+      end
+
+      it 'raises ResponseError on too many lines' do
+        serve_once(server, "STAT filler 0123456789\r\n" * ((limit / 24) + 10))
+        expect(response_within(2)).to be_a(Dalli::Elasticache::AutoDiscovery::ResponseError)
+          .and(having_attributes(message: /exceeded #{limit} bytes/))
+      end
+
+      it 'raises ResponseError on a single line with no terminator' do
+        serve_once(server, 'a' * (limit + 10))
+        expect(response_within(2)).to be_a(Dalli::Elasticache::AutoDiscovery::ResponseError)
+          .and(having_attributes(message: /exceeded #{limit} bytes/))
+      end
+    end
+
+    it 'raises EOFError when the connection closes before END' do
+      server_threads << Thread.new do
+        client = server.accept
+        client.readline
+        client.write("CONFIG cluster 0 4\r\n12\r\n")
+        client.close
+      end
+      expect { command.response }.to raise_error(EOFError)
     end
 
     it 'only treats an exact END line as the terminator' do

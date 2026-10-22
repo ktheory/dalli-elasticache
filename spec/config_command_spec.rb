@@ -36,10 +36,10 @@ describe 'Dalli::Elasticache::AutoDiscovery::ConfigCommand' do
   let(:mock_socket) { instance_double(Socket) }
 
   before do
-    allow(Socket).to receive(:tcp).with(host, port, connect_timeout: nil).and_return(mock_socket)
+    allow(Socket).to receive(:tcp).with(host, port, connect_timeout: 5, resolv_timeout: 5).and_return(mock_socket)
     allow(mock_socket).to receive(:close)
     allow(mock_socket).to receive(:puts).with(Dalli::Elasticache::AutoDiscovery::ConfigCommand::CONFIG_COMMAND)
-    allow(mock_socket).to receive(:readline).and_return(*socket_response_lines)
+    allow(mock_socket).to receive(:gets).and_return(*socket_response_lines)
   end
 
   it 'sends the config command and returns a ConfigResponse with expected values' do
@@ -54,7 +54,8 @@ describe 'Dalli::Elasticache::AutoDiscovery::ConfigCommand' do
     let(:command) { Dalli::Elasticache::AutoDiscovery::ConfigCommand.new(host, port, read_timeout) }
 
     before do
-      allow(Socket).to receive(:tcp).with(host, port, connect_timeout: read_timeout).and_return(mock_socket)
+      allow(Socket).to receive(:tcp).with(host, port, connect_timeout: read_timeout,
+                                                      resolv_timeout: read_timeout).and_return(mock_socket)
     end
 
     context 'when all lines are read before the timeout elapses' do
@@ -72,7 +73,7 @@ describe 'Dalli::Elasticache::AutoDiscovery::ConfigCommand' do
       let(:read_timeout) { 0.01 }
 
       before do
-        allow(mock_socket).to receive(:readline) do
+        allow(mock_socket).to receive(:gets) do
           sleep 0.05
           socket_response_lines.first
         end
@@ -90,6 +91,7 @@ describe 'Dalli::Elasticache::AutoDiscovery::ConfigCommand' do
     let(:mock_ssl_socket) { instance_double(OpenSSL::SSL::SSLSocket) }
 
     before do
+      allow(Socket).to receive(:tcp).with(host, port, connect_timeout: nil, resolv_timeout: nil).and_return(mock_socket)
       allow(OpenSSL::SSL::SSLSocket).to receive(:new).with(mock_socket, ssl_context).and_return(mock_ssl_socket)
       allow(mock_ssl_socket).to receive(:hostname=).with(host)
       allow(mock_ssl_socket).to receive(:sync_close=).with(true)
@@ -97,7 +99,7 @@ describe 'Dalli::Elasticache::AutoDiscovery::ConfigCommand' do
       allow(mock_ssl_socket).to receive(:post_connection_check).with(host)
       allow(mock_ssl_socket).to receive(:close)
       allow(mock_ssl_socket).to receive(:puts).with(Dalli::Elasticache::AutoDiscovery::ConfigCommand::CONFIG_COMMAND)
-      allow(mock_ssl_socket).to receive(:readline).and_return(*socket_response_lines)
+      allow(mock_ssl_socket).to receive(:gets).and_return(*socket_response_lines)
     end
 
     it 'wraps the TCP socket with SSL and returns a ConfigResponse' do
@@ -124,13 +126,14 @@ describe 'Dalli::Elasticache::AutoDiscovery::ConfigCommand' do
       let(:host) { '[2001:db8::1]' }
 
       before do
-        allow(Socket).to receive(:tcp).with('2001:db8::1', port, connect_timeout: nil).and_return(mock_socket)
+        allow(Socket).to receive(:tcp).with('2001:db8::1', port, connect_timeout: nil,
+                                                                 resolv_timeout: nil).and_return(mock_socket)
         allow(mock_ssl_socket).to receive(:post_connection_check).with('2001:db8::1')
       end
 
       it 'connects and verifies using the unbracketed address without setting SNI' do
         command.response
-        expect(Socket).to have_received(:tcp).with('2001:db8::1', port, connect_timeout: nil)
+        expect(Socket).to have_received(:tcp).with('2001:db8::1', port, connect_timeout: nil, resolv_timeout: nil)
         expect(mock_ssl_socket).not_to have_received(:hostname=)
         expect(mock_ssl_socket).to have_received(:post_connection_check).with('2001:db8::1')
       end
@@ -140,7 +143,7 @@ describe 'Dalli::Elasticache::AutoDiscovery::ConfigCommand' do
       let(:command) { Dalli::Elasticache::AutoDiscovery::ConfigCommand.new(host, port, 5, ssl_context:) }
 
       before do
-        allow(Socket).to receive(:tcp).with(host, port, connect_timeout: 5).and_return(mock_socket)
+        allow(Socket).to receive(:tcp).with(host, port, connect_timeout: 5, resolv_timeout: 5).and_return(mock_socket)
       end
 
       # The fix for #65 replaced per-line readiness gating (SSLSocket#pending / wait_readable)

@@ -31,6 +31,12 @@ describe 'Dalli::Elasticache::AutoDiscovery::Node' do
       expect(node1a).not_to eq(node_with_different_port)
       expect(node1a.eql?(node_with_different_port)).to be(false)
     end
+
+    it 'is not equal to an object that is not a Node' do
+      expect(node1a == "#{host1}:#{port1}").to be(false)
+      expect(node1a.eql?(nil)).to be(false)
+      expect([node1a]).not_to include(:not_a_node)
+    end
   end
 
   context 'when used as a hash key' do

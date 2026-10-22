@@ -13,12 +13,13 @@ module Dalli
         attr_reader :host, :port
 
         # Matches DNS/IPv4 like "my-host.cache.aws.com:11211" or bracketed IPv6 like "[::1]:11211"
-        ENDPOINT_REGEX = /^([-_.a-zA-Z0-9]+|\[[a-fA-F0-9:]+\])(?::(\d+))?$/
+        ENDPOINT_REGEX = /\A([-_.a-zA-Z0-9]+|\[[a-fA-F0-9:]+\])(?::(\d+))?\z/
 
-        def initialize(addr, timeout: nil, ssl_context: nil)
+        def initialize(addr, timeout: BaseCommand::DEFAULT_TIMEOUT, ssl_context: nil)
           @host, @port = parse_endpoint_address(addr)
           @timeout = timeout
           @ssl_context = ssl_context
+          @mutex = Mutex.new
         end
 
         DEFAULT_PORT = 11_211
@@ -26,17 +27,27 @@ module Dalli
           m = ENDPOINT_REGEX.match(addr)
           raise ArgumentError, "Unable to parse configuration endpoint address - #{addr}" unless m
 
-          [m[1], (m[2] || DEFAULT_PORT).to_i]
+          port = (m[2] || DEFAULT_PORT).to_i
+          unless (1..65_535).cover?(port)
+            raise ArgumentError, "Invalid configuration endpoint address - #{addr}: port must be between 1 and 65535"
+          end
+
+          [m[1], port]
         end
 
-        # A cached ElastiCache::StatsResponse
+        # A cached ElastiCache::StatsResponse. The mutex ensures concurrent first
+        # callers share one network call instead of each running their own.
         def stats
-          @stats ||= StatsCommand.new(@host, @port, @timeout, ssl_context: @ssl_context).response
+          @stats || @mutex.synchronize do
+            @stats ||= StatsCommand.new(@host, @port, @timeout, ssl_context: @ssl_context).response
+          end
         end
 
         # A cached ElastiCache::ConfigResponse
         def config
-          @config ||= ConfigCommand.new(@host, @port, @timeout, ssl_context: @ssl_context).response
+          @config || @mutex.synchronize do
+            @config ||= ConfigCommand.new(@host, @port, @timeout, ssl_context: @ssl_context).response
+          end
         end
 
         # The memcached engine version

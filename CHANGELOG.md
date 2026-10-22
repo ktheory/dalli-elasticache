@@ -7,16 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- `Endpoint` and the command classes now default to a 5 second timeout, matching `Dalli::ElastiCache`. Previously they had no timeout unless one was passed. Pass `timeout: nil` to disable it. [@petergoldstein](https://github.com/petergoldstein)
+
 ### Fixed
 
 - Bracketed IPv6 configuration endpoints (e.g. `[::1]:11211`) were parsed but could never connect, because the brackets were passed through to address resolution. The brackets are now stripped before connecting, and SNI is no longer set when the host is an IP literal. [@petergoldstein](https://github.com/petergoldstein)
 - An `ERROR`, `CLIENT_ERROR`, or `SERVER_ERROR` reply from the endpoint was not recognized, so discovery blocked until the read timeout (or indefinitely with `timeout: nil`). These replies now raise `Dalli::Elasticache::AutoDiscovery::ResponseError` immediately. The response terminator is now matched exactly instead of any line containing `END`. [@petergoldstein](https://github.com/petergoldstein)
 - The TLS handshake with the configuration endpoint had no timeout, so an endpoint that accepted the TCP connection but never completed the handshake blocked discovery indefinitely, regardless of `timeout:`. The handshake is now bounded by `timeout:` and raises `Timeout::Error`. [@petergoldstein](https://github.com/petergoldstein)
 - Node lists from IPv6 clusters, nodes reported without an IP address, and hostnames containing underscores were silently parsed as an empty list, producing a Dalli client with no servers that only failed on first use with `Dalli::RingError`. These nodes now parse correctly, and `#servers` (and therefore `#client`) raises `Dalli::Elasticache::AutoDiscovery::ResponseError` if a response contains no nodes. [@petergoldstein](https://github.com/petergoldstein)
+- The configuration endpoint address was validated with line anchors, so a string containing a newline (e.g. `"junk\nhost:11211"`) parsed using one of its lines. Ports outside 1–65535 were also accepted. Both now raise `ArgumentError`. [@petergoldstein](https://github.com/petergoldstein)
+- `Node#==` raised `NoMethodError` when compared with an object that is not a `Node`. It now returns `false`. [@petergoldstein](https://github.com/petergoldstein)
+- Concurrent first calls to `Endpoint#config` or `Endpoint#stats` each ran their own network call. They now share one. [@petergoldstein](https://github.com/petergoldstein)
+- `timeout:` now also bounds DNS resolution of the configuration endpoint (`resolv_timeout:`), not just the TCP connect. [@petergoldstein](https://github.com/petergoldstein)
 
 ### Security
 
 - With `ssl_context:` set to `VERIFY_PEER`, the endpoint certificate was checked against the trusted CAs but not against the endpoint hostname, because `SSLContext.new` leaves `verify_hostname` false. Any certificate from a trusted CA was accepted for any host. The hostname (or IP address) is now verified whenever `verify_mode` includes `VERIFY_PEER`, even if `verify_hostname` is false, since an explicit `false` can't be distinguished from the default. Connections that relied on a certificate not matching the endpoint host will now fail. [@petergoldstein](https://github.com/petergoldstein)
+- Discovery responses are now limited to 1 MB. Previously a misbehaving endpoint could send an unbounded response (or a single line with no terminator) and the client buffered all of it until the read timeout, or indefinitely with `timeout: nil`. Larger responses raise `Dalli::Elasticache::AutoDiscovery::ResponseError`. [@petergoldstein](https://github.com/petergoldstein)
 
 ## [2.0.2]
 

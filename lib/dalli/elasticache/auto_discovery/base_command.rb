@@ -20,10 +20,15 @@ module Dalli
       class BaseCommand
         attr_reader :host, :port, :timeout, :ssl_context
 
+        DEFAULT_TIMEOUT = 5
+
+        # Upper bound on a response. Even a large cluster's node list is a few tens of KB.
+        MAX_RESPONSE_BYTES = 1024 * 1024
+
         END_LINE = "END\r\n"
         ERROR_LINE_REGEX = /\A(?:ERROR|CLIENT_ERROR|SERVER_ERROR)\b/
 
-        def initialize(host, port, timeout = nil, ssl_context: nil)
+        def initialize(host, port, timeout = DEFAULT_TIMEOUT, ssl_context: nil)
           @host = host
           @port = port
           @timeout = timeout
@@ -34,7 +39,7 @@ module Dalli
         #
         # Returns the raw response as a String
         def send_command
-          tcp_socket = ::Socket.tcp(socket_host, @port, connect_timeout: timeout)
+          tcp_socket = ::Socket.tcp(socket_host, @port, connect_timeout: timeout, resolv_timeout: timeout)
           begin
             socket = ssl_context ? wrap_with_ssl(tcp_socket) : tcp_socket
             socket.puts command
@@ -45,10 +50,10 @@ module Dalli
         end
 
         # `timeout` bounds the entire multi-line read as a single wall-clock deadline,
-        # not each individual `readline`. A per-line readiness check (e.g. `wait_readable`)
+        # not each individual line read. A per-line readiness check (e.g. `wait_readable`)
         # can't tell buffered-but-unread bytes apart from an empty socket once a buffering
         # layer (Ruby's IO buffer, or OpenSSL::Buffering for TLS) sits between the fd and
-        # `readline`, so it can't be used to gate individual lines reliably.
+        # the line read, so it can't be used to gate individual lines reliably.
         def response_from_socket(socket)
           with_timeout('read') { read_lines(socket) }
         end
@@ -76,13 +81,26 @@ module Dalli
         def read_lines(socket)
           data = +''
           loop do
-            line = socket.readline
+            line = next_line(socket, data.bytesize)
             break if line == END_LINE
             raise ResponseError, "Auto discovery command failed: #{line.strip}" if ERROR_LINE_REGEX.match?(line)
 
             data << line
           end
           data
+        end
+
+        # Reads one line, or as much of one as fits in the remaining response budget.
+        # The limit is one byte over the budget so an oversized response is detectable.
+        # `gets` is used because OpenSSL's `readline` doesn't accept a limit.
+        def next_line(socket, bytes_read)
+          line = socket.gets("\n", MAX_RESPONSE_BYTES - bytes_read + 1)
+          raise EOFError, 'Auto discovery connection closed before END' unless line
+          if bytes_read + line.bytesize > MAX_RESPONSE_BYTES
+            raise ResponseError, "Auto discovery response exceeded #{MAX_RESPONSE_BYTES} bytes"
+          end
+
+          line
         end
 
         def wrap_with_ssl(tcp_socket)
