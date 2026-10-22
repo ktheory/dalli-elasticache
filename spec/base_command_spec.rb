@@ -29,7 +29,7 @@ describe 'Dalli::Elasticache::AutoDiscovery::BaseCommand' do
   end
 
   describe 'timeouts' do
-    before { allow(Socket).to receive(:tcp).and_raise(SocketError, "stubbed") }
+    before { allow(Socket).to receive(:tcp).and_raise(SocketError, 'stubbed') }
 
     it 'defaults to 5 seconds' do
       expect(Dalli::Elasticache::AutoDiscovery::ConfigCommand.new('example.com', 11_211).timeout).to eq(5)
@@ -37,7 +37,7 @@ describe 'Dalli::Elasticache::AutoDiscovery::BaseCommand' do
 
     it 'applies the timeout to DNS resolution as well as the TCP connect' do
       command = Dalli::Elasticache::AutoDiscovery::ConfigCommand.new('example.com', 11_211, 2)
-      expect { command.response }.to raise_error(SocketError, "stubbed")
+      expect { command.response }.to raise_error(SocketError, 'stubbed')
       expect(Socket).to have_received(:tcp).with('example.com', 11_211, connect_timeout: 2, resolv_timeout: 2)
     end
   end
