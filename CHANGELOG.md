@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+
+- Bracketed IPv6 configuration endpoints (e.g. `[::1]:11211`) were parsed but could never connect, because the brackets were passed through to address resolution. The brackets are now stripped before connecting, and SNI is no longer set when the host is an IP literal. [@petergoldstein](https://github.com/petergoldstein)
+- An `ERROR`, `CLIENT_ERROR`, or `SERVER_ERROR` reply from the endpoint was not recognized, so discovery blocked until the read timeout (or indefinitely with `timeout: nil`). These replies now raise `Dalli::Elasticache::AutoDiscovery::ResponseError` immediately. The response terminator is now matched exactly instead of any line containing `END`. [@petergoldstein](https://github.com/petergoldstein)
+
+### Security
+
+- With `ssl_context:` set to `VERIFY_PEER`, the endpoint certificate was checked against the trusted CAs but not against the endpoint hostname, because `SSLContext.new` leaves `verify_hostname` false. Any certificate from a trusted CA was accepted for any host. The hostname is now verified whenever the peer is verified. [@petergoldstein](https://github.com/petergoldstein)
+
 ## [2.0.2]
 
 ### Fixed

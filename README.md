@@ -95,7 +95,7 @@ Pass an `OpenSSL::SSL::SSLContext` via `ssl_context:` to enable TLS for the auto
 
 ```ruby
 ssl_context = OpenSSL::SSL::SSLContext.new
-ssl_context.verify_mode = OpenSSL::SSL::VERIFY_PEER
+ssl_context.set_params(verify_mode: OpenSSL::SSL::VERIFY_PEER)
 
 elasticache = Dalli::ElastiCache.new(
   "my-cluster.abc123.cfg.use1.cache.amazonaws.com:11211",
@@ -103,6 +103,8 @@ elasticache = Dalli::ElastiCache.new(
   ssl_context: ssl_context
 )
 ```
+
+When the context's `verify_mode` includes `VERIFY_PEER`, the endpoint's certificate is also checked against the endpoint hostname (or IP address), even if `verify_hostname` was left at its `SSLContext.new` default of `false`. `set_params` additionally loads the system CA store.
 
 Note that `ssl_context:` controls TLS for the auto-discovery endpoint only. To also encrypt traffic to the cache nodes themselves, pass `ssl_context:` in the Dalli options as well:
 
