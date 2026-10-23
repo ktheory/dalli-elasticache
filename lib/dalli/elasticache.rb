@@ -35,8 +35,10 @@ module Dalli
     # a bracketed IPv6 address.
     # dalli_options - a set of options passed to the Dalli::Client that is returned
     # by the client method.  Otherwise unused.
-    # timeout: - connect and read timeout in seconds for auto-discovery TCP calls.
-    # Defaults to 5 seconds.
+    # timeout: - timeout in seconds applied separately to each step of an auto-discovery
+    # call: DNS resolution, TCP connect, TLS handshake, and reading the response.
+    # Defaults to 5 seconds. Pass nil to disable.
+    # ssl_context: - an OpenSSL::SSL::SSLContext to use TLS for the auto-discovery calls.
     ##
     def initialize(config_endpoint, dalli_options = {}, timeout: DEFAULT_TIMEOUT, ssl_context: nil)
       @timeout = timeout
@@ -79,7 +81,11 @@ module Dalli
       nodes.map(&:to_s)
     end
 
-    # Clear all cached data from the cluster endpoint
+    # Discards the cached discovery results so the next call re-queries the
+    # configuration endpoint. Returns self.
+    #
+    # This does not change Dalli::Client instances already returned by #client;
+    # call #client again to get one that uses the current node list.
     def refresh
       config_endpoint = "#{endpoint.host}:#{endpoint.port}"
       @endpoint = Dalli::Elasticache::AutoDiscovery::Endpoint.new(config_endpoint, timeout: @timeout,

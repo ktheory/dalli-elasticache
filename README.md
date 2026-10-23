@@ -16,7 +16,7 @@ gem 'dalli-elasticache'
 Using Dalli Elasticache in Rails
 ---------------------------------
 
-Note that the list of memcached servers used by Rails will be refreshed each time an app server process starts.  If the list of nodes in your cluster changes, this configuration will not be reflected in the Rails configuraiton without such a server process restart.
+Note that the list of memcached servers used by Rails will be refreshed each time an app server process starts.  If the list of nodes in your cluster changes, this configuration will not be reflected in the Rails configuration without such a server process restart.
 
 ### Configuring a Cache Store
 
@@ -114,31 +114,46 @@ elasticache = Dalli::ElastiCache.new(endpoint, { ssl_context: ssl_context }, ssl
 
 ### Refreshing the Node List
 
-The node list is fetched once and cached. Call `#refresh` to re-query the endpoint, which creates a new `Dalli::Client` with the current node list.
+The node list is fetched once and cached. `#refresh` discards the cached list so the next call re-queries the endpoint. It does **not** update a `Dalli::Client` you already have: each call to `#client` builds a new client from the node list at that moment. After refreshing, call `#client` again and switch to the new client. You can then `close` the old one; Dalli reconnects a closed client automatically if anything still uses it.
 
 Two common patterns for keeping the node list up to date:
 
-**On failure** — rescue `Dalli::RingError` (raised when no nodes are reachable) and refresh before retrying:
+**On failure:** rescue `Dalli::RingError` (raised when no nodes are reachable), build a new client from a refreshed node list, and retry once:
 
 ```ruby
+retried = false
 begin
   cache.get("key")
 rescue Dalli::RingError
-  elasticache.refresh
+  raise if retried
+
+  retried = true
+  old_cache = cache
+  cache = elasticache.refresh.client
+  old_cache.close
   retry
 end
 ```
 
-**On a schedule** — refresh periodically in a background thread or job. AWS does not publish exact timing for node replacement, but the process typically takes a few minutes, so refreshing every 60 seconds is a reasonable default:
+Limit the retries. If the cluster is still unreachable after a refresh, retrying without a limit loops forever.
+
+**On a schedule:** refresh periodically in a background thread or job and swap in the new client. AWS does not publish exact timing for node replacement, but the process typically takes a few minutes, so refreshing every 60 seconds is a reasonable default:
 
 ```ruby
 Thread.new do
   loop do
     sleep 60
-    elasticache.refresh
+    new_cache = elasticache.refresh.client
+    old_cache = cache
+    cache = new_cache
+    old_cache.close
+  rescue StandardError => e
+    warn "ElastiCache refresh failed, keeping the current client: #{e.message}"
   end
 end
 ```
+
+If discovery fails, for example because the endpoint times out or lists no nodes, `#client` raises and the existing client stays in use.
 
 A combination of both approaches is reasonable for production use.
 

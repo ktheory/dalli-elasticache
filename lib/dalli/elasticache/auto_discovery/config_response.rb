@@ -35,7 +35,7 @@ module Dalli
 
         # Node hosts, ip addresses, and ports
         #
-        # Returns an Array of Hashes with values for :host, :ip and :port
+        # Returns an Array of Node
         def nodes
           NODE_LIST_REGEX.match(@text).to_s.scan(NODE_REGEX).map do |match|
             Node.new(match[1], match[2], match[3].to_i)

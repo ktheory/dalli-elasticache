@@ -93,6 +93,14 @@ describe 'Dalli::Elasticache::AutoDiscovery::BaseCommand' do
       end
     end
 
+    it 'truncates a long error line in the exception message' do
+      serve_once(server, "SERVER_ERROR #{'x' * 10_000}\r\n")
+      expect { command.response }.to raise_error(Dalli::Elasticache::AutoDiscovery::ResponseError) { |error|
+        expect(error.message).to start_with('Auto discovery command failed: SERVER_ERROR xxx')
+        expect(error.message.length).to be < 300
+      }
+    end
+
     context 'when the response exceeds the size limit' do
       let(:timeout) { 3 }
       let(:limit) { Dalli::Elasticache::AutoDiscovery::BaseCommand::MAX_RESPONSE_BYTES }

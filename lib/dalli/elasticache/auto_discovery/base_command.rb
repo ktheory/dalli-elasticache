@@ -8,8 +8,9 @@ module Dalli
   module Elasticache
     module AutoDiscovery
       ##
-      # Raised when the configuration endpoint replies with ERROR,
-      # CLIENT_ERROR, or SERVER_ERROR instead of the expected response.
+      # Raised when the configuration endpoint's response can't be used: it replied
+      # with ERROR, CLIENT_ERROR, or SERVER_ERROR, the response exceeded
+      # MAX_RESPONSE_BYTES, or (from Dalli::ElastiCache#servers) it listed no nodes.
       ##
       class ResponseError < StandardError; end
 
@@ -24,6 +25,9 @@ module Dalli
 
         # Upper bound on a response. Even a large cluster's node list is a few tens of KB.
         MAX_RESPONSE_BYTES = 1024 * 1024
+
+        # Server-supplied text quoted in an exception message is cut to this length
+        MAX_ERROR_TEXT_LENGTH = 200
 
         END_LINE = "END\r\n"
         ERROR_LINE_REGEX = /\A(?:ERROR|CLIENT_ERROR|SERVER_ERROR)\b/
@@ -83,11 +87,16 @@ module Dalli
           loop do
             line = next_line(socket, data.bytesize)
             break if line == END_LINE
-            raise ResponseError, "Auto discovery command failed: #{line.strip}" if ERROR_LINE_REGEX.match?(line)
+            raise ResponseError, "Auto discovery command failed: #{error_text(line)}" if ERROR_LINE_REGEX.match?(line)
 
             data << line
           end
           data
+        end
+
+        def error_text(line)
+          text = line.strip
+          text.length > MAX_ERROR_TEXT_LENGTH ? "#{text[0, MAX_ERROR_TEXT_LENGTH]}..." : text
         end
 
         # Reads one line, or as much of one as fits in the remaining response budget.
