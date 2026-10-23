@@ -21,6 +21,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Node#==` raised `NoMethodError` when compared with an object that is not a `Node`. It now returns `false`. [@petergoldstein](https://github.com/petergoldstein)
 - Concurrent first calls to `Endpoint#config` or `Endpoint#stats` each ran their own network call. They now share one. [@petergoldstein](https://github.com/petergoldstein)
 - `timeout:` now also bounds DNS resolution of the configuration endpoint (`resolv_timeout:`), not just the TCP connect. [@petergoldstein](https://github.com/petergoldstein)
+- The README's "Refreshing the Node List" examples didn't work. `#refresh` doesn't update a `Dalli::Client` you already have, so the "on failure" example retried the same stale client indefinitely and the "on a schedule" example had no effect. The examples now build and switch to a new client, and the retry is limited. [@petergoldstein](https://github.com/petergoldstein)
+- The published gem didn't include the `LICENSE` file (or `CHANGELOG.md`). Both are now packaged, and the gem metadata links to the source and changelog over https. [@petergoldstein](https://github.com/petergoldstein)
+- `ResponseError` messages quoted the server's error line in full. Quoted text is now truncated to 200 characters. [@petergoldstein](https://github.com/petergoldstein)
 
 ### Security
 
